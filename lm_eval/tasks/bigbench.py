@@ -3,7 +3,7 @@ from lm_eval.base import MultipleChoiceTask
 from . common import HFTask
 
 
-class HellaSwag(HFTask, MultipleChoiceTask):
+class BigBench(HFTask, MultipleChoiceTask):
     DATASET_PATH = "hellaswag"
     DATASET_NAME = None
 
