@@ -45,35 +45,47 @@ class GPT2LM(LM):
                 return (len(toks), self.tokenizer.decode(toks))
             
             reord = utils.Reorderer(requests, _collate)
+            
+            # last token optimization state stuff
+            last_token_slice = None
+            last_token_slice_ctx = None
+            last_ctx_logprob = None
+            
             for context, continuation in tqdm(reord.get_reordered()):
                 # when too long to fit in context, truncate from the left
+                combined_toks = self.tokenizer.encode(context + continuation)
+
+                # if the last run has all the info we need, then just do that
+                if combined_toks[:-1] == last_token_slice_ctx:
+                    max_equal = (greedy_tokens[:-1] == cont_toks[:-1]).all() and greedy_tokens[-1] == combined_toks[-1]
+                    res.append((last_ctx_logprob + last_token_slice[combined_toks[-1]], bool(max_equal)))
+                    continue
 
                 if context == "":
                     # end of text as context
                     context_enc = [50256]
                 else:
                     context_enc = self.tokenizer.encode(context)
-                
+
                 continuation_enc = self.tokenizer.encode(continuation)
                 inp = torch.tensor([(context_enc + continuation_enc)[-self.max_length:]], dtype=torch.long).to(self.device)
                 ctxlen = len(context_enc) - max(0, len(context_enc) + len(continuation_enc) - self.max_length)
 
                 cont_toks = inp[:, ctxlen:]  # [batch, seq]
                 logits = F.log_softmax(self.gpt2(inp)[0], dim=-1)[:, ctxlen - 1:-1]  # [batch, seq, vocab]
-                
+
                 greedy_tokens = logits.argmax(dim=-1)
                 max_equal = (greedy_tokens == cont_toks).all()
 
                 last_token_slice = logits[:, -1, :].squeeze(0).tolist()
+                last_token_slice_ctx = combined_toks[:-1]
 
                 logits = torch.gather(logits, 2, cont_toks.unsqueeze(-1)).squeeze(-1) # [batch, seq]
+                
+                last_ctx_logprob = float(logits[:, :-1].sum() if logits.shape[-1] > 1 else 0)
+                res.append((last_ctx_logprob + last_token_slice[combined_toks[-1]], bool(max_equal)))
 
-                res.append((float(logits[:, :-1].sum() if logits.shape[-1] > 1 else 0), last_token_slice, bool(max_equal)))
-
-        # optimization: if two requests have everything the same except the last token, use 
-        # last token distribution to save compute
-        lasttoks = [self.tokenizer.encode(x[1])[-1] for x in requests]
-        return [(l + lts[lasttok], m) for (l, lts, m), lasttok in zip(reord.get_original(res), lasttoks)]
+        return reord.get_original(res)
     
     def greedy_until(self, requests):
         # TODO: implement fully general `until` that handles untils that are 
