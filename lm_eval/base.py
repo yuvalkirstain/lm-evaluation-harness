@@ -125,7 +125,7 @@ class Task(abc.ABC):
         if self._training_docs is None:
             self._training_docs = list(self.training_docs())
 
-        return rnd.sample(self._training_docs, k)
+        return rnd.sample(self._training_docs, min(k, len(self._training_docs)))
 
     @abc.abstractmethod
     def doc_to_text(self, doc):
