@@ -2,6 +2,8 @@ import os
 import re
 import collections
 
+ValResult = collections.namedtuple("ValResult", ["val_loss", "val_acc"])
+
 
 class ExitCodeError(Exception):
     pass
@@ -11,6 +13,13 @@ def sh(x):
     if os.system(x):
         raise ExitCodeError()
 
+
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
 
 def simple_parse_args_string(args_string):
     """
@@ -25,6 +34,8 @@ def simple_parse_args_string(args_string):
     args_dict = {}
     for arg in arg_list:
         k, v = arg.split("=")
+        if is_number(v):
+            v = float(v) if float(v) != int(float(v)) else int(v)
         args_dict[k] = v
     return args_dict
 

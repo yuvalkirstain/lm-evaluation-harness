@@ -151,7 +151,7 @@ class Task(abc.ABC):
 
     @abc.abstractmethod
     def process_results(self, doc, results):
-        """Take a single document and the LM results and evaluates, returning a 
+        """Take a single document and the LM results and evaluates, returning a
         dict where keys are the names of submetrics and values are the values of 
         the metric for that one document
 
@@ -208,6 +208,21 @@ class Task(abc.ABC):
 
         example = self.doc_to_text(doc)
         return description + labeled_examples + example
+
+    def labeled_examples(self, num_fewshot, rnd):
+        fewshotex = []
+        # for sets with no training docs, draw from other set *but ensure no overlap with current doc*
+        if self.has_training_docs():
+            fewshotex = self.fewshot_examples(k=num_fewshot, rnd=rnd)
+        else:
+            raise ValueError("Currently we only allow tasks with a train set")
+            # if self._fewshot_docs is None:
+            #     self._fewshot_docs = list(self.validation_docs() if self.has_validation_docs else self.test_docs())
+            #
+            # fewshotex = rnd.sample(self._fewshot_docs, num_fewshot + 1)
+
+        labeled_examples = [{"context": self.doc_to_text(doc), "completion": self.doc_to_target(doc)} for doc in fewshotex]
+        return labeled_examples, fewshotex
 
 
 class MultipleChoiceTask(Task):

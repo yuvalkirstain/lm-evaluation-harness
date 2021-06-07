@@ -1,0 +1,16 @@
+{
+  "model_type": "t5",
+  "models": [
+    "google/t5-v1_1-large"
+  ],
+  "optimizers": [
+    "adafactor"
+  ],
+  "batch_and_grad_accu": [
+    [
+      4,
+      8
+    ]
+  ],
+  "gpus": 1
+}

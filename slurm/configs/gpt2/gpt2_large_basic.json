@@ -1,0 +1,16 @@
+{
+  "model_type": "gpt2",
+  "models": [
+    "gpt2-large"
+  ],
+  "optimizers": [
+    "adamw"
+  ],
+  "batch_and_grad_accu": [
+    [
+      4,
+      8
+    ]
+  ],
+  "gpus": 1
+}
