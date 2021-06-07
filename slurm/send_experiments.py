@@ -31,7 +31,7 @@ def create_slurm_scripts(model_base_name, cur_output_dir, project_name, model, t
 #SBATCH --ntasks=1
 #SBATCH --mem=50000 
 #SBATCH --cpus-per-task=4
-#SBATCH --exclude=n-101,n-007,n-301,n-302,n-303,n-304
+#SBATCH --exclude=n-101,n-007
 #SBATCH --gpus={gpus}
 srun sh {script_name}
 """
@@ -110,10 +110,12 @@ def main():
                                      allow_abbrev=False)
     parser.add_argument('--configs', type=str, required=True, nargs="+")
     args = parser.parse_args()
-    assert len(args.configs) > 2, "You need to have a save, experiment type, and model configs"
+    assert len(args.configs) == 2, "You need to have an experiment and model configs"
     run_args = {}
     for config in args.configs:
-        run_args.update(json.load(open(config)))
+        cur_conf = json.load(open(config))
+        assert len(run_args.keys() & cur_conf.keys()) == 0, "one of the configs overrides the other."
+        run_args.update(cur_conf)
     run_model_jobs(**run_args)
 
 
