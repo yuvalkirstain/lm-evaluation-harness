@@ -102,7 +102,7 @@ class GeneralTranslationTask(Task):
 
     def process_results(self, doc, results):
         # These metrics are corpus-level not sentence level, so we'll hide the
-        # results in this dict and compute the corpus score in the aggregate method
+        # results_old in this dict and compute the corpus score in the aggregate method
         ref_pred = (doc["ref"], results)
         return {
             "bleu": ref_pred,

@@ -102,6 +102,20 @@ class SST(HFTask):
         }
 
 
+class SSTLM(SST):
+    def doc_to_text(self, doc):
+        return "{}\nIt was".format(
+            general_detokenize(doc["sentence"]),
+        )
+
+    def doc_to_target(self, doc):
+        return " {}".format({1: "great", 0: "terrible"}[doc["label"]])
+
+    def construct_requests(self, doc, ctx):
+        ll_positive, _ = rf.loglikelihood(ctx, " great")
+        ll_negative, _ = rf.loglikelihood(ctx, " terrible")
+        return ll_positive, ll_negative
+
 # Inference Tasks
 
 
@@ -161,6 +175,25 @@ class MNLI(HFTask):
             "acc": mean
         }
 
+
+class MNLILower(MNLI):
+    def doc_to_text(self, doc):
+        return "{}\nQuestion: {} true, false or neither?\nAnswer:".format(
+            doc["premise"],
+            doc["hypothesis"].strip() + ('' if doc["hypothesis"].strip().endswith('.') else '.'),
+        )
+
+    def doc_to_target(self, doc):
+        # True = entailment
+        # False = contradiction
+        # Neither = neutral
+        return " {}".format({0: "true", 1: "neither", 2: "false"}[doc["label"]])
+
+    def construct_requests(self, doc, ctx):
+        ll_true, _ = rf.loglikelihood(ctx, " true")
+        ll_neither, _ = rf.loglikelihood(ctx, " neither")
+        ll_false, _ = rf.loglikelihood(ctx, " false")
+        return ll_true, ll_neither, ll_false
 
 class MNLIMismatched(MNLI):
 
@@ -298,6 +331,11 @@ class RTE(HFTask):
         ll_true, _ = rf.loglikelihood(ctx, " True")
         ll_false, _ = rf.loglikelihood(ctx, " False")
         return ll_true, ll_false
+
+    def get_example(self, doc, ctx):
+        gold_req, _ = rf.loglikelihood(ctx, " False") if doc["label"] else rf.loglikelihood(ctx, " True")
+        example = {"context": gold_req.args[0], "completion": gold_req.args[1]}
+        return example
 
     def process_results(self, doc, results):
         ll_true, ll_false = results
@@ -466,14 +504,14 @@ class STSB(HFTask):
         raise NotImplementedError('Evaluation not implemented')
     
     def process_results(self, doc, results):
-        """Take a single document and the LM results and evaluates, returning a 
+        """Take a single document and the LM results_old and evaluates, returning a
         dict where keys are the names of submetrics and values are the values of 
         the metric for that one document
 
         :param doc:
             The document as returned from training_docs, validation_docs, or test_docs.
         :param results:
-            The results of the requests created in construct_requests.
+            The results_old of the requests created in construct_requests.
         """
         # TODO: implement evaluation.
         raise NotImplementedError('Evaluation not implemented')

@@ -8,7 +8,7 @@ from functools import partial
 
 def _squad_metric(predictions, references):
     squad_metric = datasets.load_metric("squad_v2")
-    return squad_metric.compute(predictions=predictions, references=references)
+    return squad_metric.compute(predictions=predictions, references=references, **{"no_answer_threshold": 0.9})
 
 
 def _squad_agg(key, items):
@@ -67,14 +67,14 @@ class SQuAD2(HFTask):
         return continuation, is_unanswerable
     
     def process_results(self, doc, results):
-        """Take a single document and the LM results and evaluates, returning a 
+        """Take a single document and the LM results_old and evaluates, returning a
         dict where keys are the names of submetrics and values are the values of 
         the metric for that one document
 
         :param doc:
             The document as returned from training_docs, validation_docs, or test_docs.
         :param results:
-            The results of the requests created in construct_requests.
+            The results_old of the requests created in construct_requests.
         """
         continuation, (logprob_unanswerable, _) = results
 
@@ -83,7 +83,7 @@ class SQuAD2(HFTask):
         predictions = {
             'id': doc['id'],
             'prediction_text': continuation,
-            'no_answer_probability': no_answer_probability,
+            'no_answer_probability': no_answer_probability if continuation != "unanswerable" else 1,
         }
 
         references = {

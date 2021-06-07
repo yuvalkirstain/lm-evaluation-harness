@@ -66,14 +66,14 @@ class ANLIBase(HFTask):
         return ll_true, ll_neither, ll_false
     
     def process_results(self, doc, results):
-        """Take a single document and the LM results and evaluates, returning a 
+        """Take a single document and the LM results_old and evaluates, returning a
         dict where keys are the names of submetrics and values are the values of 
         the metric for that one document
 
         :param doc:
             The document as returned from training_docs, validation_docs, or test_docs.
         :param results:
-            The results of the requests created in construct_requests.
+            The results_old of the requests created in construct_requests.
         """
         gold = doc["label"]
         pred = np.argmax(results)

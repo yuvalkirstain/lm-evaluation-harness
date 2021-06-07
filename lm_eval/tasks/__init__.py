@@ -37,6 +37,7 @@ from . import hendrycks_test
 from . import hendrycks_math
 from . import cbt
 from . import lambada_cloze
+from . import commonsense_qa
 
 ########################################
 # Translation tasks
@@ -47,7 +48,6 @@ gpt3_translation_benchmarks = {
     "wmt14": ['en-fr', 'fr-en'],  # French
     "wmt16": ['en-ro', 'ro-en', 'de-en', 'en-de'],  # German, Romanian
 }
-
 
 # 28 total
 selected_translation_benchmarks = {
@@ -62,7 +62,6 @@ all_translation_benchmarks = {
     for ts in sacrebleu.get_available_testsets()
 }
 
-
 ########################################
 # All tasks
 ########################################
@@ -72,12 +71,13 @@ TASK_REGISTRY = {
     # GLUE
     "cola": glue.CoLA,
     "mnli": glue.MNLI,
+    "mnli_lower": glue.MNLILower,
     "mnli_mismatched": glue.MNLIMismatched,
     "mrpc": glue.MRPC,
     "rte": glue.RTE,
     "qnli": glue.QNLI,
     "qqp": glue.QQP,
-    #"stsb": glue.STSB, # not implemented yet
+    # "stsb": glue.STSB, # not implemented yet
     "sst": glue.SST,
     "wnli": glue.WNLI,
     # SuperGLUE
@@ -88,7 +88,7 @@ TASK_REGISTRY = {
     "record": superglue.ReCoRD,
     "wic": superglue.WordsInContext,
     "wsc": superglue.SGWinogradSchemaChallenge,
-    
+
     # Order by benchmark/genre?
     "coqa": coqa.CoQA,
     "drop": drop.DROP,
@@ -100,19 +100,19 @@ TASK_REGISTRY = {
     "piqa": piqa.PiQA,
 
     # Science related
-    "pubmedqa" : pubmedqa.Pubmed_QA,
-    "sciq" : sciq.SciQ,
-    #"qa4mre" : qa4mre.QA4MRE,
-    "qa4mre_2011" : qa4mre.QA4MRE_2011,
-    "qa4mre_2012" : qa4mre.QA4MRE_2012,
-    "qa4mre_2013" : qa4mre.QA4MRE_2013,
+    "pubmedqa": pubmedqa.Pubmed_QA,
+    "sciq": sciq.SciQ,
+    # "qa4mre" : qa4mre.QA4MRE,
+    "qa4mre_2011": qa4mre.QA4MRE_2011,
+    "qa4mre_2012": qa4mre.QA4MRE_2012,
+    "qa4mre_2013": qa4mre.QA4MRE_2013,
 
     "triviaqa": triviaqa.TriviaQA,
     "arc_easy": arc.ARCEasy,
     "arc_challenge": arc.ARCChallenge,
     # "quac": quac.QuAC, # not implemented yet
     "logiqa": logiqa.LogiQA,
-    "hellaswag": hellaswag.HellaSwag, # not implemented yet
+    "hellaswag": hellaswag.HellaSwag,  # not implemented yet
     "openbookqa": openbookqa.OpenBookQA,
     # "sat": sat.SATAnalogies, # not implemented yet
     "squad2": squad.SQuAD2,
@@ -171,8 +171,17 @@ TASK_REGISTRY = {
     "cycle_letters": unscramble.CycleLetters,
     "random_insertion": unscramble.RandomInsertion,
     "reversed_words": unscramble.ReversedWords,
-}
 
+    # Yuval additions
+    "piqa_cls": piqa.PiQACls,
+    "piqa_extractive": piqa.PiQAExt,
+    "arc_easy_cls": arc.ARCEasyCls,
+    "arc_easy_extractive": arc.ARCEasyExtractive,
+    "sst_lm": glue.SSTLM,
+    "multirc_prompt": superglue.MultiRCPrompt,
+    "commonsense_qa": commonsense_qa.CommonsenseQA,
+    "commonsense_qa_extractive": commonsense_qa.CommonsenseQAExt,
+}
 
 ALL_TASKS = sorted(list(TASK_REGISTRY))
 

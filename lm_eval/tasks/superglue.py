@@ -6,7 +6,7 @@ To-do:
 import numpy as np
 import sklearn
 import transformers.data.metrics.squad_metrics as squad_metrics
-from . common import HFTask, yesno
+from .common import HFTask, yesno
 from lm_eval.base import rf
 from ..metrics import mean, acc_all, metric_max_over_ground_truths
 from ..utils import general_detokenize
@@ -31,12 +31,11 @@ class BoolQ(HFTask):
 
     def doc_to_text(self, doc):
         return f"{doc['passage']}\nQuestion: {doc['question']}\nAnswer:"
-    
+
     def doc_to_target(self, doc):
-        return " " + yesno(doc['label']) 
+        return " " + yesno(doc['label'])
 
     def construct_requests(self, doc, ctx):
-
         ll_yes, _ = rf.loglikelihood(ctx, ' yes')
         ll_no, _ = rf.loglikelihood(ctx, ' no')
 
@@ -51,12 +50,12 @@ class BoolQ(HFTask):
         return {
             "acc": acc
         }
-    
+
     def higher_is_better(self):
         return {
             "acc": True
         }
-    
+
     def aggregation(self):
         return {
             "acc": mean
@@ -79,7 +78,7 @@ class CommitmentBank(HFTask):
     def fewshot_description(self):
         # TODO: figure out actual description
         return "Given a premise and a hypothesis, classify whether the author of the premise is committed" \
-            "to the truth of the hypothesis. The three possible labels are true, false or neither."
+               "to the truth of the hypothesis. The three possible labels are true, false or neither."
 
     def doc_to_text(self, doc):
         return "{}\nQuestion: {}. True, False or Neither?\nAnswer:".format(
@@ -109,7 +108,7 @@ class CommitmentBank(HFTask):
             "acc": acc,
             "f1": (pred, gold)
         }
-    
+
     def higher_is_better(self):
         return {
             "acc": True,
@@ -126,7 +125,7 @@ class CommitmentBank(HFTask):
         f13 = sklearn.metrics.f1_score(y_true=golds == 2, y_pred=preds == 2)
         avg_f1 = mean([f11, f12, f13])
         return avg_f1
-    
+
     def aggregation(self):
         return {
             "acc": mean,
@@ -150,7 +149,7 @@ class Copa(HFTask):
     def fewshot_description(self):
         # TODO: figure out actual description
         return "Given a premise and one alternative with a causal relation to the premise and another without," \
-            "choose the more plausible alternative"
+               "choose the more plausible alternative"
 
     def doc_to_text(self, doc):
         # Drop the period
@@ -168,7 +167,7 @@ class Copa(HFTask):
     def construct_requests(self, doc, ctx):
         choice1 = " " + self.convert_choice(doc["choice1"])
         choice2 = " " + self.convert_choice(doc["choice2"])
-        
+
         ll_choice1, _ = rf.loglikelihood(ctx, choice1)
         ll_choice2, _ = rf.loglikelihood(ctx, choice2)
 
@@ -182,12 +181,12 @@ class Copa(HFTask):
         return {
             "acc": acc
         }
-    
+
     def higher_is_better(self):
         return {
             "acc": True
         }
-    
+
     def aggregation(self):
         return {
             "acc": mean
@@ -196,6 +195,21 @@ class Copa(HFTask):
     @staticmethod
     def convert_choice(choice):
         return choice[0].lower() + choice[1:]
+
+
+class CopaCls(Copa):
+    def doc_to_text(self, doc):
+        # Drop the period
+        connector = {
+            "cause": "because",
+            "effect": "therefore",
+        }[doc["question"]]
+        return doc["premise"].strip()[:-1] + f" {connector}"
+
+    def doc_to_target(self, doc):
+        correct_choice = doc["choice1"] if doc["label"] == 0 else doc["choice2"]
+        # Connect the sentences
+        return " " + self.convert_choice(correct_choice)
 
 
 class MultiRC(HFTask):
@@ -213,7 +227,7 @@ class MultiRC(HFTask):
 
     def fewshot_description(self):
         # TODO: figure out actual description
-        return "READING COMPREHENSION ANSWER KEY"
+        return ""
 
     def doc_to_text(self, doc):
         return f"{doc['paragraph']}\nQuestion: {doc['question']}\nAnswer:"
@@ -229,7 +243,7 @@ class MultiRC(HFTask):
     def construct_requests(self, doc, ctx):
         true_choice = self.format_answer(answer=doc["answer"], label=True)
         false_choice = self.format_answer(answer=doc["answer"], label=False)
-        
+
         ll_true_choice, _ = rf.loglikelihood(ctx, f' {true_choice}')
         ll_false_choice, _ = rf.loglikelihood(ctx, f' {false_choice}')
 
@@ -240,15 +254,41 @@ class MultiRC(HFTask):
         return {
             "acc": (pred, doc)
         }
-    
+
     def higher_is_better(self):
         return {
             "acc": True
         }
-    
+
     def aggregation(self):
         return {
             "acc": acc_all
+        }
+
+
+class MultiRCPrompt(MultiRC):
+    def doc_to_text(self, doc):
+        return f"{doc['paragraph']}\nQuestion: {doc['question']}\nIs the correct answer \"{doc['answer']}\"?"
+
+    def doc_to_target(self, doc):
+        label_str = "yes" if doc["label"] else "no"
+        return " " + label_str
+
+    @staticmethod
+    def choose_label(label):
+        return "yes" if label else "no"
+
+    def construct_requests(self, doc, ctx):
+
+        ll_true_choice, _ = rf.loglikelihood(ctx, f' yes')
+        ll_false_choice, _ = rf.loglikelihood(ctx, f' no')
+
+        return ll_false_choice, ll_true_choice
+
+    def process_results(self, doc, results):
+        pred = np.argmax(results)
+        return {
+            "acc": (pred, doc)
         }
 
 
@@ -364,10 +404,10 @@ class WordsInContext(HFTask):
     def doc_to_text(self, doc):
         return "Sentence 1: {}\nSentence 2: {}\nQuestion: Is the word '{}' used in the same way in the" \
                " two sentences above?\nAnswer:".format(
-                    doc["sentence1"],
-                    doc["sentence2"],
-                    doc["sentence1"][doc["start1"]:doc["end1"]],
-                )
+            doc["sentence1"],
+            doc["sentence2"],
+            doc["sentence1"][doc["start1"]:doc["end1"]],
+        )
 
     def doc_to_target(self, doc):
         return " {}".format({0: "no", 1: "yes"}[doc["label"]])
@@ -427,9 +467,9 @@ class SGWinogradSchemaChallenge(HFTask):
 
     def fewshot_description(self):
         return "Final Exam with Answer Key\n" \
-           "Instructions: Please carefully read the following passages. " \
-           "For each passage, you must identify which noun the pronoun marked in *bold*" \
-           " refers to.\n====="
+               "Instructions: Please carefully read the following passages. " \
+               "For each passage, you must identify which noun the pronoun marked in *bold*" \
+               " refers to.\n====="
 
     def doc_to_text(self, doc):
         raw_passage = doc["text"]
@@ -440,9 +480,9 @@ class SGWinogradSchemaChallenge(HFTask):
         noun = doc["span1_text"]
         pronoun = doc["span2_text"]
         text = (
-            f"Passage: {passage}\n"
-            + f"Question: In the passage above, does the pronoun \"*{pronoun}*\" refer to \"*{noun}*\"?\n"
-            + "Answer:"
+                f"Passage: {passage}\n"
+                + f"Question: In the passage above, does the pronoun \"*{pronoun}*\" refer to \"*{noun}*\"?\n"
+                + "Answer:"
         )
         return text
 
