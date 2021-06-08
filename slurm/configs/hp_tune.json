@@ -26,7 +26,6 @@
     0
   ],
   "tasks": [
-    "squad2",
     "rte",
     "piqa"
   ],
