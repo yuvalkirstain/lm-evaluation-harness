@@ -27,7 +27,8 @@
   ],
   "tasks": [
     "rte",
-    "piqa"
+    "piqa",
+    "squad2"
   ],
   "n_shots": [
     512,
