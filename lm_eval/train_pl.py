@@ -92,8 +92,7 @@ def train_lm(model, tokenizer, train_set, task_name, train_args):
     train_args = TrainArgs(train_set_size=len(train_set), task_name=task_name, **train_args)
 
     # If passed along, set the training seed now.
-    if train_args.seed is not None:
-        set_seed(train_args.seed)
+    set_seed(1234)
 
     logger = pl.loggers.CometLogger(
         api_key=os.environ.get('COMET_API_KEY'),
