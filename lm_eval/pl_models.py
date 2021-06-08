@@ -148,7 +148,19 @@ class LitT5(LitGPT2):
 
     def configure_optimizers(self):
         # Split weights in two groups, one with weight decay and the other not.
-        optimizer = Adafactor(self.model.parameters(), scale_parameter=False, relative_step=False, warmup_init=False,
+        no_decay = ["bias", "LayerNorm.weight"]
+        optimizer_grouped_parameters = [
+            {
+                "params": [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
+                "weight_decay": self.weight_decay,
+            },
+            {
+                "params": [p for n, p in self.model.named_parameters() if any(nd in n for nd in no_decay)],
+                "weight_decay": 0.0,
+            },
+        ]
+
+        optimizer = Adafactor(optimizer_grouped_parameters, scale_parameter=False, relative_step=False, warmup_init=False,
                               lr=self.learning_rate)
 
         lr_scheduler = get_scheduler(
