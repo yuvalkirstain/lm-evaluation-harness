@@ -20,11 +20,11 @@ Fill in the `hp_tune.json` to make sure that the save are ok.
 
 run:
 ```python
-python slurm/send_experiments.py --configs slurm/configs/t5/t5_large_basic.json slurm/configs/hp_tune.json
+python slurm/send_experiments.py --configs slurm/configs/t5/t5_large_basic.json slurm/configs/experiments_fine_tune.json
 ```
 
 (one can also try first to run:
 ```python
-python slurm/send_experiments.py --configs slurm/configs/t5/t5_large_basic.json slurm/configs/test_slurm.json
+python slurm/send_experiments.py --configs slurm/configs/t5/t5_large_basic.json slurm/configs/test_slurm_fine_tune.json
 ```
 so make sure things are ok)
