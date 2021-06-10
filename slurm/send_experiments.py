@@ -79,6 +79,7 @@ def run_model_jobs(models, tasks, n_shots, results_dir, project_name, model_type
                                                     effective_n_shot = 32
                                                 else:
                                                     train = "train"
+                                                    effective_n_shot = n_shot
                                                 model_base_name = os.path.basename(model)
                                                 cur_output_dir = create_experiment_dir(results_dir, train, task,
                                                                                        model_base_name,
