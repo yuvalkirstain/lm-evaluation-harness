@@ -1,0 +1,35 @@
+{
+  "project_name": "tests",
+  "lr_scheduler_type": "linear",
+  "dropouts": [
+    0.1
+  ],
+  "decays": [
+    0.01
+  ],
+  "lrs": [
+    5e-5
+  ],
+  "gradient_clip_vals": [
+    1
+  ],
+  "tasks": [
+    "rte",
+    "squad1",
+    "nq_open"
+  ],
+  "n_shots": [
+    128
+  ],
+  "min_steps": [
+    256,
+    1024
+  ],
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "results_dir": "/home/olab/kirstain/lm-evaluation-harness/results_arzi",
+  "temp_dir": "/home/olab/kirstain/lm-evaluation-harness/tmp/"
+}

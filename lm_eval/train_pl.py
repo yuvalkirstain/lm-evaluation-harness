@@ -43,6 +43,7 @@ class TrainArgs:
     preprocessing_num_workers: int = 1
     overwrite_cache: bool = True
     min_warmup_steps: int = 100
+    num_warmup_steps: int = None
     warmup_ratio: float = 0.1
     seed: int = 1234
     max_train_steps: int = None
@@ -51,7 +52,7 @@ class TrainArgs:
 
 
 def write_datasets_fo_read(train_set, save_prefix):
-    num_in_train = max((len(train_set) * 8) // 10, len(train_set) - 400)
+    num_in_train = max((len(train_set) * 3) // 4, len(train_set) - 400)
     train_set, dev_set = train_set[:num_in_train], train_set[num_in_train:]
     temp_dir = tempfile.TemporaryDirectory(prefix=save_prefix)
     print(f"saving stuff in {temp_dir}")
@@ -79,9 +80,9 @@ def load_raw_datasests(train_set, save_prefix):
 
 
 def get_monitor_name(task_name):
-    if task_name in ["arc_easy", "copa", "openbookqa", "lambada_cloze", "triviaqa", "piqa", "webqs"]:
+    if task_name in ["arc_easy", "copa", "openbookqa", "lambada_cloze", "triviaqa", "piqa", "webqs", "nq_open"]:
         return VAL_LOSS, "min"
-    elif task_name in ["rte", "sst", "wic", "multirc", "anli_r1", "wsc", "boolq", "squad2"]:
+    elif task_name in ["rte", "sst", "wic", "multirc", "anli_r1", "wsc", "boolq", "squad2", "squad1"]:
         return VAL_ACC, "max"
     else:
         raise ValueError(f"We don't support task {task_name}")
@@ -92,7 +93,7 @@ def train_lm(model, tokenizer, train_set, task_name, train_args):
     train_args = TrainArgs(train_set_size=len(train_set), task_name=task_name, **train_args)
 
     # If passed along, set the training seed now.
-    set_seed(1234)
+    set_seed(train_args.seed)
 
     logger = pl.loggers.CometLogger(
         api_key=os.environ.get('COMET_API_KEY'),
@@ -169,7 +170,7 @@ def train_lm(model, tokenizer, train_set, task_name, train_args):
         gpus=-1,
         accumulate_grad_batches=train_args.gradient_accumulation_steps,
         plugins=None,
-        precision=16 if "gpt2" in train_args.pretrained else 32,
+        precision=32,
         logger=logger,
         max_steps=train_args.max_train_steps,
         min_steps=train_args.min_train_steps,
@@ -184,6 +185,7 @@ def train_lm(model, tokenizer, train_set, task_name, train_args):
 
     train_args = asdict(train_args)
     train_args["best_model_path"] = checkpoint_callback.best_model_path
+    train_args["best_model_score"] = checkpoint_callback.best_model_score.item()
     train_args["previous_experiment"] = logger.experiment.get_key()
     temp_dir.cleanup()
     return test_model.model.eval(), train_args

@@ -5,7 +5,7 @@ import random
 from lm_eval.train_pl import train_lm
 
 
-def evaluate(lm, task_dict, provide_description, num_fewshot, limit, train_args, model_args):
+def evaluate(lm, task_dict, provide_description, num_fewshot, limit, train_args, model_args, seed):
     # TODO: completely refactor this entire function to not be a huge mess, ideally breaking it down into smaller pieces
     lm = lm.create_from_arg_string(model_args)
     task_dict_items = [(name, task) for name, task in task_dict.items() if(task.has_validation_docs() or task.has_test_docs())]
@@ -38,12 +38,12 @@ def evaluate(lm, task_dict, provide_description, num_fewshot, limit, train_args,
         # deterministically shuffle docs and chop off the first `limit` because sometimes docs are in some kind of order
         task_docs = list(task_doc_func())
         rnd = random.Random()
-        rnd.seed(42)
+        rnd.seed(seed)
         rnd.shuffle(task_docs)
 
         if train_args:
             train_rnd = random.Random()
-            train_rnd.seed(42)
+            train_rnd.seed(seed)  # TODO change to given seed
             lm = lm.create_from_arg_string(model_args)
             train_set, train_docs = task.labeled_examples(num_fewshot, train_rnd)
             task_docs = [doc for doc in task_docs if doc not in train_docs]

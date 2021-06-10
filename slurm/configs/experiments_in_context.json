@@ -1,0 +1,34 @@
+{
+  "project_name": "experiments-fair",
+  "tasks": [
+    "arc_easy",
+    "cola",
+    "rte",
+    "sst",
+    "boolq",
+    "copa",
+    "wic",
+    "multirc",
+    "openbookqa",
+    "anli_r1",
+    "winogrande",
+    "triviaqa",
+    "race",
+    "nq_open",
+    "piqa",
+    "squad2",
+    "squad1"
+  ],
+  "n_shots": [
+    0
+  ],
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "results_dir": "/home/olab/kirstain/lm-evaluation-harness/results_arzi",
+  "temp_dir": "/home/olab/kirstain/lm-evaluation-harness/tmp/"
+}

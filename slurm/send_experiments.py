@@ -5,18 +5,18 @@ from pathlib import Path
 import argparse
 
 
-def create_experiment_dir(results_dir, train, task, model_base_name, n_shot, dropout, decay, lr, optimizer, gradient_clip_val, min_step):
+def create_experiment_dir(results_dir, train, task, model_base_name, n_shot, dropout, decay, lr, optimizer, gradient_clip_val, min_step, seed):
     exp_dir = os.path.join(results_dir,
                            train,
                            task,
-                           f"{model_base_name}-{task}-{n_shot}-{dropout}-{decay}-{lr}-{optimizer}-{gradient_clip_val}-{min_step}")
+                           f"{model_base_name}-{task}-{n_shot}-{dropout}-{decay}-{lr}-{optimizer}-{gradient_clip_val}-{min_step}-{seed}")
     Path(exp_dir).mkdir(parents=True, exist_ok=True)
     return exp_dir
 
 
 def create_slurm_scripts(model_base_name, cur_output_dir, project_name, model, task, n_shot, cur_output_path, dropout,
                          decay, lr, train, optimizer, model_type, lr_scheduler_type, train_batch_size, grad_accu,
-                         save_pre, gradient_clip_val, gpus, min_step):
+                         save_pre, gradient_clip_val, gpus, min_step, seed):
     script_name = os.path.join(cur_output_dir, "run.sh")
     slurm_name = os.path.join(cur_output_dir, "slurm.sh")
     with open(slurm_name, "w") as f:
@@ -41,7 +41,7 @@ srun sh {script_name}
         run_script = f"""#!/bin/bash -x
 cd /home/olab/kirstain/lm-evaluation-harness
 export COMET_PROJECT="{model_base_name}-{project_name}"
-bash slurm/run_single_experiment.sh {model} {task} {n_shot} {cur_output_path} {dropout} {decay} {lr} {train} {optimizer} {model_type} {lr_scheduler_type} {train_batch_size} {grad_accu} {save_pre} {gradient_clip_val} {min_step}
+bash slurm/run_single_experiment.sh {model} {task} {n_shot} {cur_output_path} {dropout} {decay} {lr} {train} {optimizer} {model_type} {lr_scheduler_type} {train_batch_size} {grad_accu} {save_pre} {gradient_clip_val} {min_step} {seed}
 """
         f.write(run_script)
 
@@ -58,10 +58,10 @@ def send_job_and_report(slurm_name):
     print(stderr.decode("utf-8"))
 
 
-def run_model_jobs(models, tasks, n_shots, results_dir, project_name, model_type, gpus, dropouts=("no",),
+def run_model_jobs(models, tasks, n_shots, results_dir, project_name, model_type, gpus, seeds, dropouts=("no",),
                    decays=("no",), lrs=("no",), optimizers=("no",),
                    lr_scheduler_type="no", batch_and_grad_accu=("no",), temp_dir="no", gradient_clip_vals=("no",),
-                   min_steps=("no,")):
+                   min_steps=("no",)):
     sent_jobs = 0
     for model in models:
         for task in tasks:
@@ -71,36 +71,37 @@ def run_model_jobs(models, tasks, n_shots, results_dir, project_name, model_type
                         for optimizer in optimizers:
                             for gradient_clip_val in gradient_clip_vals:
                                 for min_step in min_steps:
-                                    for lr in lrs:
-                                        for train_batch_size, grad_accu in batch_and_grad_accu:
-                                            if n_shot == 0:
-                                                train = "no_train"
-                                                n_shot = 32
-                                            else:
-                                                train = "train"
-                                            model_base_name = os.path.basename(model)
-                                            cur_output_dir = create_experiment_dir(results_dir, train, task,
-                                                                                   model_base_name,
-                                                                                   n_shot, dropout, decay, lr,
-                                                                                   optimizer, gradient_clip_val,
-                                                                                   min_step)
+                                    for seed in seeds:
+                                        for lr in lrs:
+                                            for train_batch_size, grad_accu in batch_and_grad_accu:
+                                                if n_shot == 0:
+                                                    train = "no_train"
+                                                    effective_n_shot = 32
+                                                else:
+                                                    train = "train"
+                                                model_base_name = os.path.basename(model)
+                                                cur_output_dir = create_experiment_dir(results_dir, train, task,
+                                                                                       model_base_name,
+                                                                                       effective_n_shot, dropout, decay, lr,
+                                                                                       optimizer, gradient_clip_val,
+                                                                                       min_step, seed)
 
-                                            cur_output_path = os.path.join(cur_output_dir, "results.json")
-                                            if os.path.exists(cur_output_path):
-                                                print(f"{cur_output_path} exists")
-                                                continue
-                                            slurm_name = create_slurm_scripts(model_base_name, cur_output_dir,
-                                                                              project_name,
-                                                                              model, task, n_shot,
-                                                                              cur_output_path, dropout, decay, lr,
-                                                                              train,
-                                                                              optimizer, model_type,
-                                                                              lr_scheduler_type, train_batch_size,
-                                                                              grad_accu,
-                                                                              temp_dir, gradient_clip_val, gpus, min_step)
-                                            send_job_and_report(slurm_name)
-                                            print(slurm_name)
-                                            sent_jobs += 1
+                                                cur_output_path = os.path.join(cur_output_dir, "results.json")
+                                                if os.path.exists(cur_output_path):
+                                                    print(f"{cur_output_path} exists")
+                                                    continue
+                                                slurm_name = create_slurm_scripts(model_base_name, cur_output_dir,
+                                                                                  project_name,
+                                                                                  model, task, effective_n_shot,
+                                                                                  cur_output_path, dropout, decay, lr,
+                                                                                  train,
+                                                                                  optimizer, model_type,
+                                                                                  lr_scheduler_type, train_batch_size,
+                                                                                  grad_accu,
+                                                                                  temp_dir, gradient_clip_val, gpus, min_step, seed)
+                                                send_job_and_report(slurm_name)
+                                                print(slurm_name)
+                                                sent_jobs += 1
 
     print(f"Sent {sent_jobs} jobs")
 

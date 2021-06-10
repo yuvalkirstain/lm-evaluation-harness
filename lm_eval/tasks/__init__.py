@@ -16,6 +16,7 @@ from . import hellaswag
 from . import openbookqa
 from . import squad
 from . import naturalqs
+from . import nq_open
 from . import sat
 from . import arithmetic
 from . import lambada
@@ -181,6 +182,8 @@ TASK_REGISTRY = {
     "multirc_prompt": superglue.MultiRCPrompt,
     "commonsense_qa": commonsense_qa.CommonsenseQA,
     "commonsense_qa_extractive": commonsense_qa.CommonsenseQAExt,
+    "squad1": squad.SQuAD1,
+    "nq_open": nq_open.NQOpen,
 }
 
 ALL_TASKS = sorted(list(TASK_REGISTRY))

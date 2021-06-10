@@ -19,7 +19,7 @@ def parse_args():
     parser.add_argument('--tasks', default="all_tasks")
     parser.add_argument('--provide_description', action="store_true")
     parser.add_argument('--num_fewshot', type=int, default=0)
-    parser.add_argument('--seed', type=int, default=1234)
+    parser.add_argument('--seed', type=int, required=True)
     parser.add_argument('--output_path', default=None)
     parser.add_argument('--limit', type=int, default=None)
     parser.add_argument('--no_cache', action="store_true")
@@ -50,10 +50,13 @@ def main():
 
     train_args = simple_parse_args_string(args.train_args)
     model_args = simple_parse_args_string(args.model_args)
+
     if train_args:
         train_args.update(model_args)
+        train_args["seed"] = args.seed
+
     results = evaluator.evaluate(lm, task_dict, args.provide_description, args.num_fewshot, args.limit, train_args,
-                                 args.model_args)
+                                 args.model_args, args.seed)
 
     results["args"] = args.__dict__
     dumped = json.dumps(results, indent=2)

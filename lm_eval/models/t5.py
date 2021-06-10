@@ -109,16 +109,18 @@ class T5LM(LM):
             cont = self.model.generate(
                 context_enc,
                 max_length=self.MAX_GEN_TOKS,
-                eos_token_id=primary_until,
+                eos_token_id=self.tokenizer.convert_tokens_to_ids("<extra_id_1>"),
                 do_sample=False
             )
 
             s = self.tokenizer.decode(cont[0].tolist()[2:-1])
             if "<extra_id_1>" in s:
                 s = s[:s.index("<extra_id_1>")]
+            if "</s>" in s:
+                s = s[:s.index("</s>")]
             for term in until:
                 s = s.split(term)[0]
-            
+
             # partial caching
             self.cache_hook.add_partial("greedy_until", (context, until), s)
             
