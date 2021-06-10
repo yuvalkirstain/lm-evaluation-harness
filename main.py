@@ -68,11 +68,17 @@ def main():
     for task, task_res in results.items():
         if task not in task_names:
             continue
-        for k, v in task_res.items():
-            if "train_args" == k:
-                experiment = comet_ml.ExistingExperiment(api_key=os.environ.get('COMET_API_KEY'),
-                                                         previous_experiment=v["previous_experiment"])
-                experiment.log_asset(args.output_path)
+        if "train_args" not in task_res:
+            experiment = comet_ml.Experiment(
+                api_key=os.environ.get('COMET_API_KEY'),
+                project_name=os.environ.get('COMET_PROJECT', "few-shot"),
+                workspace=os.environ.get('COMET_WORKSPACE', "yuvalkirstain"),
+            )
+            experiment.log_asset(args.output_path)
+        else:
+            experiment = comet_ml.ExistingExperiment(api_key=os.environ.get('COMET_API_KEY'),
+                                                     previous_experiment=task_res["train_args"]["previous_experiment"])
+            experiment.log_asset(args.output_path)
 
 
 if __name__ == "__main__":
