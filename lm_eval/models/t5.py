@@ -104,7 +104,7 @@ class T5LM(LM):
 
             context_enc = torch.tensor([self.tokenizer.encode(context.strip() + "<extra_id_0>.")[- self.max_length:]]).to(self.device)
 
-            primary_until, = self.tokenizer.encode(until[0])
+            # primary_until, = self.tokenizer.encode(until[0])
 
             cont = self.model.generate(
                 context_enc,
