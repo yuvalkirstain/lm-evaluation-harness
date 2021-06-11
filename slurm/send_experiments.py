@@ -3,7 +3,9 @@ import os
 import subprocess
 from pathlib import Path
 import argparse
-
+# to make sure venv is running
+import pytorch_lightning
+import comet_ml
 
 def create_experiment_dir(results_dir, train, task, model_base_name, n_shot, dropout, decay, lr, optimizer, gradient_clip_val, min_step, seed):
     exp_dir = os.path.join(results_dir,
@@ -113,6 +115,7 @@ def main():
     parser.add_argument('--configs', type=str, required=True, nargs="+")
     args = parser.parse_args()
     assert len(args.configs) == 2, "You need to have an experiment and model configs"
+    assert len(os.environ.get("COMET_API_KEY")) > 3, "Please set up comet api key"
     run_args = {}
     for config in args.configs:
         cur_conf = json.load(open(config))

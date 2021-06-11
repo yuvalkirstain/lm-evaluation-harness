@@ -14,11 +14,13 @@ Set up your Comet-ml env vars:
 export COMET_API_KEY="<api key>"
 ```
 
-### Run hp-tuning experiments
+### Run experiments
 
-Fill in the `hp_tune.json` to make sure that the save are ok.
+Fill in the `<x>.json` config files in `configs` to make sure that the save paths are ok.
 
-run:
+You need to specify two configs - model, and experiments type.
+
+For example, you can run:
 ```python
 python slurm/send_experiments.py --configs slurm/configs/t5/t5_large_basic.json slurm/configs/experiments_fine_tune.json
 ```
