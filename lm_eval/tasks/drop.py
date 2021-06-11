@@ -88,9 +88,7 @@ class DROP(Task):
             language description, as well as the few shot examples, and the question
             part of the document for `doc`.
         """
-        conts = []
-        for _ in doc["answers"]:
-            conts.append(rf.greedy_until(ctx, ["."]))
+        conts = [rf.greedy_until(ctx, ["."])]
         return conts
 
     def process_results(self, doc, results):
@@ -103,7 +101,7 @@ class DROP(Task):
         :param results:
             The results_old of the requests created in construct_requests.
         """
-        preds, golds = results, doc["answers"]
+        preds, golds = results, [", ".join(doc["answers"])]
         exact_match, f1_score = self.get_metrics(preds, golds)
         return {
             "em": exact_match,
