@@ -80,7 +80,7 @@ def load_raw_datasests(train_set, save_prefix):
 
 
 def get_monitor_name(task_name):
-    if task_name in ["arc_easy", "copa", "openbookqa", "lambada_cloze", "triviaqa", "piqa", "webqs", "nq_open"]:
+    if task_name in ["arc_easy", "copa", "openbookqa", "lambada_cloze", "triviaqa", "piqa", "webqs", "nq_open", "winogrande", "race"]:
         return VAL_LOSS, "min"
     elif task_name in ["rte", "sst", "wic", "multirc", "anli_r1", "wsc", "boolq", "squad2", "squad1"]:
         return VAL_ACC, "max"
