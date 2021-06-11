@@ -111,8 +111,8 @@ class DROP(Task):
         }
 
     def get_metrics(self, preds, golds):
-        exact_match = self._exact_match(preds, golds)
-        f1_score = self._f1_score(preds, golds)
+        exact_match = self._exact_match(preds, golds) * 100
+        f1_score = self._f1_score(preds, golds) * 100
         return exact_match, f1_score
 
     def _exact_match(self, preds, golds):
