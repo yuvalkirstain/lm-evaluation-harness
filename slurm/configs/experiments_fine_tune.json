@@ -36,7 +36,8 @@
     "nq_open",
     "piqa",
     "squad2",
-    "squad1"
+    "squad1",
+    "drop"
   ],
   "n_shots": [
     32,
