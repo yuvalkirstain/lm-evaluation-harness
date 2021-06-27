@@ -3,6 +3,7 @@ from pprint import pprint
 import sacrebleu
 
 from . import superglue
+from . import mrqa
 from . import glue
 from . import arc
 from . import coqa
@@ -176,6 +177,7 @@ TASK_REGISTRY = {
     # Yuval additions
     "piqa_cls": piqa.PiQACls,
     "piqa_extractive": piqa.PiQAExt,
+    "copa_explicit": superglue.CopaExplicit,
     "arc_easy_cls": arc.ARCEasyCls,
     "arc_easy_extractive": arc.ARCEasyExtractive,
     "sst_lm": glue.SSTLM,
@@ -184,6 +186,15 @@ TASK_REGISTRY = {
     "commonsense_qa_extractive": commonsense_qa.CommonsenseQAExt,
     "squad1": squad.SQuAD1,
     "nq_open": nq_open.NQOpen,
+    "winogrande_explicit": winogrande.WinograndeExplicit,
+    "winogrande_t5": winogrande.WinograndeT5,
+    "copa_t5": superglue.CopaT5,
+    "rte_lm": glue.RTELM,
+    "race_middle": race.RACEMiddle,
+    "mrqa_triviaqa": mrqa.MRQATriviaQA,
+    "mrqa_natural_questions": mrqa.MRQANaturalQuestions,
+    "mrqa_triviaqa_open": mrqa.MRQATriviaQAOpen,
+    "mrqa_natural_questions_open": mrqa.MRQANaturalQuestionsOpen,
 }
 
 ALL_TASKS = sorted(list(TASK_REGISTRY))

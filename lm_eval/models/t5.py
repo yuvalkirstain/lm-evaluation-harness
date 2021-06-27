@@ -42,9 +42,12 @@ class T5LM(LM):
                 # end of text as context
                 raise ValueError("Yuval - I didn't handle this case")
             else:
-                context_enc = self.tokenizer.encode(context + "<extra_id_0>.")
+                if "<extra_id_0>" not in context:
+                    context_enc = self.tokenizer.encode(context + "<extra_id_0>.")
+                else:
+                    context_enc = self.tokenizer.encode(context)
 
-            continuation_enc = self.tokenizer.encode("<extra_id_0> " + continuation, add_special_tokens=False)
+            continuation_enc = self.tokenizer.encode("<extra_id_0> " + continuation.strip(), add_special_tokens=False)
 
             new_reqs.append(((context, continuation), context_enc, continuation_enc))
 

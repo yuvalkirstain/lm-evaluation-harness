@@ -18,11 +18,11 @@ class GPT2LM(LM):
 
         config = transformers.AutoConfig.from_pretrained(pretrained)
         config_d = config.to_dict()
-        if dropout is not None:
-            for k in config_d.keys():
-                if "drop" in k:
-                    config_d[k] = dropout
-        config = config.from_dict(config_d)
+        # if dropout is not None:
+        #     for k in config_d.keys():
+        #         if "drop" in k:
+        #             config_d[k] = float(dropout)
+        # config = config.from_dict(config_d)
 
         self.model = transformers.AutoModelForCausalLM.from_pretrained(pretrained, config=config).eval()
 

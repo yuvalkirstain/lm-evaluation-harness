@@ -143,3 +143,8 @@ class RACE(HFTask):
         return {
             "acc": True
         }
+
+
+class RACEMiddle(RACE):
+    DATASET_PATH = "race"
+    DATASET_NAME = "middle"

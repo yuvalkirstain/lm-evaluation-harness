@@ -197,19 +197,71 @@ class Copa(HFTask):
         return choice[0].lower() + choice[1:]
 
 
-class CopaCls(Copa):
+class CopaExplicit(Copa):
+
+    @staticmethod
+    def connector_to_q(connector):
+        if connector == "cause":
+            return "What was the CAUSE of this?"
+        elif connector == "effect":
+            return "What happened as a RESULT?"
+        else:
+            raise ValueError
+
+    def doc_to_text(self, doc):
+        # Drop the period
+        return f"Premise: {doc['premise'].strip()} {self.connector_to_q(doc['question'])}\nAlternative 1: {doc['choice1']}\nAlternative 2: {doc['choice2']}\nAnswer:"
+
+    def doc_to_target(self, doc):
+        correct_choice = doc["choice1"] if doc["label"] == 0 else doc["choice2"]
+        # Connect the sentences
+        return " " + self.convert_choice(correct_choice)
+
+    def construct_requests(self, doc, ctx):
+        choices_prefix = ""
+        for w1, w2 in zip(doc['choice1'].split(), doc['choice2'].split()):
+            if w1 == w2:
+                choices_prefix += f" {w1}"
+                continue
+            break
+
+        lls = [
+            rf.loglikelihood(ctx, choices_prefix + f" {w1}")[0],
+            rf.loglikelihood(ctx, choices_prefix + f" {w2}")[0],
+        ]
+
+        return lls
+
+
+class CopaT5(Copa):
+    def fewshot_description(self):
+        return ""
+
     def doc_to_text(self, doc):
         # Drop the period
         connector = {
             "cause": "because",
             "effect": "therefore",
         }[doc["question"]]
-        return doc["premise"].strip()[:-1] + f" {connector}"
+        return doc["premise"].strip()[:-1] + "<extra_id_0>"
 
     def doc_to_target(self, doc):
         correct_choice = doc["choice1"] if doc["label"] == 0 else doc["choice2"]
         # Connect the sentences
         return " " + self.convert_choice(correct_choice)
+
+    def construct_requests(self, doc, ctx):
+        connector = {
+            "cause": "because",
+            "effect": "therefore",
+        }[doc["question"]]
+
+        lls = [
+            rf.loglikelihood(self.doc_to_text(doc) + " " + self.convert_choice(doc["choice1"]), " " + connector)[0],
+            rf.loglikelihood(self.doc_to_text(doc) + " " + self.convert_choice(doc["choice2"]), " " + connector)[0],
+        ]
+
+        return lls
 
 
 class MultiRC(HFTask):
@@ -268,7 +320,7 @@ class MultiRC(HFTask):
 
 class MultiRCPrompt(MultiRC):
     def doc_to_text(self, doc):
-        return f"{doc['paragraph']}\nQuestion: {doc['question']}\nIs the correct answer \"{doc['answer']}\"?"
+        return f"{doc['paragraph']}\nQuestion: {doc['question']}\nIs \"{doc['answer']}\" a correct answer?"
 
     def doc_to_target(self, doc):
         label_str = "yes" if doc["label"] else "no"

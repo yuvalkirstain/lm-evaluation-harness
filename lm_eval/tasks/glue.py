@@ -356,6 +356,27 @@ class RTE(HFTask):
         }
 
 
+class RTELM(RTE):
+    def doc_to_text(self, doc):
+        return f"{doc['sentence1']} Therefore, we"
+
+    def doc_to_target(self, doc):
+        # 0 = entailment
+        # 1 = not_entailment
+        connector = {0: "can", 1: "can't"}[doc["label"]]
+        return f" {connector} say that {self._convert_completion(doc)}"
+
+    @staticmethod
+    def _convert_completion(doc):
+        return doc['sentence2'][0].lower() + doc['sentence2'][1:]
+
+    def construct_requests(self, doc, ctx):
+        ll_true, _ = rf.loglikelihood(ctx + " can say that", f" {self._convert_completion(doc)}")
+        ll_false, _ = rf.loglikelihood(ctx + " can't say that", f" {self._convert_completion(doc)}")
+        return ll_true, ll_false
+
+
+
 # Similarity and Paraphrase Tasks
 
 

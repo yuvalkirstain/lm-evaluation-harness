@@ -188,10 +188,10 @@ class LitT5(LitGPT2):
                 "labels": torch.tensor(labels)}
 
     def tokenize_function(self, examples):
-        full_texts = [context.strip() + "<extra_id_0>." for context in examples["context"]]
+        full_texts = [context.strip() + "<extra_id_0>." if "<extra_id_0>" not in context else context for context in examples["context"]]
         data = self.tokenizer(full_texts)
         data["labels"] = \
-            self.tokenizer(["<extra_id_0>" + completion.strip() + "<extra_id_1>" for completion in examples["completion"]],
+            self.tokenizer(["<extra_id_0> " + completion.strip() + "<extra_id_1>" for completion in examples["completion"]],
                            add_special_tokens=False)["input_ids"]
         for k in data:
             for i in range(len(data[k])):
