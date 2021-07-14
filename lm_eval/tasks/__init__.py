@@ -195,6 +195,7 @@ TASK_REGISTRY = {
     "mrqa_natural_questions": mrqa.MRQANaturalQuestions,
     "mrqa_triviaqa_open": mrqa.MRQATriviaQAOpen,
     "mrqa_natural_questions_open": mrqa.MRQANaturalQuestionsOpen,
+    "copa_timo": superglue.CopaTimo
 }
 
 ALL_TASKS = sorted(list(TASK_REGISTRY))

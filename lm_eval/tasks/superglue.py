@@ -264,6 +264,37 @@ class CopaT5(Copa):
         return lls
 
 
+class CopaTimo(Copa):
+    def fewshot_description(self):
+        return ""
+
+    def doc_to_text(self, doc):
+        # Drop the period
+        connector = {
+            "cause": "because",
+            "effect": "so",
+        }[doc["question"]]
+        return f"\"{self.convert_choice(doc['choice1'])[:-1]}\" or \"{self.convert_choice(doc['choice2'])[:-1]}\"? " + doc["premise"].strip()[:-1] + f", {connector}"
+
+    def doc_to_target(self, doc):
+        correct_choice = doc["choice1"] if doc["label"] == 0 else doc["choice2"]
+        # Connect the sentences
+        return " " + self.convert_choice(correct_choice)[:-1]
+
+    def construct_requests(self, doc, ctx):
+        connector = {
+            "cause": "because",
+            "effect": "therefore",
+        }[doc["question"]]
+
+        lls = [
+            rf.loglikelihood(self.doc_to_text(doc), " " + self.convert_choice(doc["choice1"])[:-1])[0],
+            rf.loglikelihood(self.doc_to_text(doc), " " + self.convert_choice(doc["choice2"])[:-1])[0]
+        ]
+
+        return lls
+
+
 class MultiRC(HFTask):
     DATASET_PATH = "super_glue"
     DATASET_NAME = "multirc"

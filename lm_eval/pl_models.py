@@ -2,6 +2,7 @@ from typing import List, Dict, Union
 
 import torch
 import pytorch_lightning as pl
+from lm_eval.linear_scheduler_with_warmup import LinearSchedulerWithWarmup
 from lm_eval.utils import ValResult
 from transformers import (
     AdamW,
@@ -46,8 +47,8 @@ class LitGPT2(pl.LightningModule):
         if torch.isnan(loss).any():
             raise ValueError("got nan!")
         self.log('train/loss', loss, on_step=True, on_epoch=True, sync_dist=True, logger=True, prog_bar=True)
-        self.log('train/global_step', self.global_step, on_step=True, logger=True, prog_bar=True)
-        self.log('train/batch_size', len(outputs[1]), on_step=True, logger=True, prog_bar=True)
+        self.log('train/global_step', self.global_step, on_step=True, sync_dist=True, logger=True, prog_bar=True)
+        self.log('train/batch_size', len(outputs[1]), on_step=True, sync_dist=True, logger=True, prog_bar=True)
         return loss
 
     def get_progress_bar_dict(self):
@@ -70,11 +71,11 @@ class LitGPT2(pl.LightningModule):
             relevant_greedy_tokens = greedy_tokens[idx][relevant_indices]
             cur_acc = (relevant_labels == relevant_greedy_tokens).all(dim=-1).float()
             batch_acc[idx] = cur_acc
-        return ValResult(loss, batch_acc.mean())
+        return {"val_loss": loss, "val_acc": batch_acc.mean()}
 
     def validation_epoch_end(self, outputs):
-        loss = torch.stack([x.val_loss for x in outputs]).mean()
-        val_acc = torch.stack([x.val_acc for x in outputs]).mean()
+        loss = torch.stack([x["val_loss"] for x in outputs]).mean()
+        val_acc = torch.stack([x["val_acc"] for x in outputs]).mean()
         self.log(VAL_LOSS, loss, prog_bar=True, sync_dist=True, logger=True)  # default on val/test is on_epoch only
         self.log(VAL_ACC, val_acc, prog_bar=True, sync_dist=True, logger=True)
 
@@ -144,7 +145,7 @@ class LitT5(LitGPT2):
             relevant_greedy_tokens = greedy_tokens[idx][relevant_indices]
             cur_acc = (relevant_labels == relevant_greedy_tokens).all(dim=-1).float()
             batch_acc[idx] = cur_acc
-        return ValResult(loss, batch_acc.mean())
+        return {"val_loss": loss, "val_acc": batch_acc.mean()}
 
     def configure_optimizers(self):
         # Split weights in two groups, one with weight decay and the other not.
@@ -163,8 +164,14 @@ class LitT5(LitGPT2):
         optimizer = Adafactor(optimizer_grouped_parameters, scale_parameter=False, relative_step=False, warmup_init=False,
                               lr=self.learning_rate)
 
-        lr_scheduler = get_scheduler(
-            name=self.lr_scheduler_type,
+        # lr_scheduler = get_scheduler(
+        #     name=self.lr_scheduler_type,
+        #     optimizer=optimizer,
+        #     num_warmup_steps=self.num_warmup_steps,
+        #     num_training_steps=self.max_train_steps,
+        # )
+        assert self.lr_scheduler_type == "linear", "We currently only support linear"
+        lr_scheduler = LinearSchedulerWithWarmup(
             optimizer=optimizer,
             num_warmup_steps=self.num_warmup_steps,
             num_training_steps=self.max_train_steps,

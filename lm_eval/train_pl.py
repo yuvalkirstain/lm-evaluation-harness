@@ -3,6 +3,8 @@ import math
 import os
 import random
 import tempfile
+from typing import Optional, Union, List, Dict
+
 from datasets import load_dataset
 from torch.utils.data import DataLoader
 
@@ -82,14 +84,14 @@ def load_raw_datasests(train_set, save_prefix):
 def get_monitor_name(task_name):
     if task_name in ["arc_easy", "copa", "openbookqa", "lambada_cloze", "triviaqa", "piqa", "webqs", "nq_open", "winogrande", "race", "race_middle", "mrqa_natural_questions", "mrqa_natural_questions_open", "mrqa_triviaqa", "mrqa_triviaqa_open"]:
         return VAL_LOSS, "min"
-    elif task_name in ["rte", "sst", "wic", "multirc", "anli_r1", "wsc", "boolq", "squad2", "squad1", "drop", "piqa_extractive", "copa_extractive", "winogrande_non_partial", "winogrande_explicit", "copa_explicit"]:
+    elif task_name in ["rte", "sst", "wic", "multirc", "anli_r1", "wsc", "boolq", "squad2", "squad1", "drop", "piqa_extractive", "copa_extractive", "winogrande_non_partial", "winogrande_explicit", "copa_explicit", "copa_timo"]:
         return VAL_ACC, "max"
     else:
         raise ValueError(f"We don't support task {task_name}")
 
 
 def train_lm(model, tokenizer, train_set, task_name, train_args):
-
+    model = model.to('cpu')
     train_args = TrainArgs(train_set_size=len(train_set), task_name=task_name, **train_args)
 
     # If passed along, set the training seed now.
@@ -141,28 +143,42 @@ def train_lm(model, tokenizer, train_set, task_name, train_args):
                                 train_args.learning_rate,
                                 tokenizer)
 
-    tokenized_datasets = raw_datasets.map(
-        model_finetuner.tokenize_function,
-        batched=True,
-        num_proc=train_args.preprocessing_num_workers,
-        remove_columns=column_names,
-        load_from_cache_file=not train_args.overwrite_cache,
-    )
+    class FSDataModule(pl.LightningDataModule):
+        def __init__(self):
+            super().__init__()
+            self.tokenized_datasets = None
+            self.train_dataset = None
+            self.eval_dataset = None
 
-    train_dataset = tokenized_datasets["train"]
-    eval_dataset = tokenized_datasets["validation"]
+        def setup(self, stage: Optional[str] = None) -> None:
+            tokenized_datasets = raw_datasets.map(
+                model_finetuner.tokenize_function,
+                batched=True,
+                num_proc=train_args.preprocessing_num_workers,
+                remove_columns=column_names,
+                load_from_cache_file=not train_args.overwrite_cache,
+            )
+            self.tokenized_datasets = tokenized_datasets
+            self.train_dataset = self.tokenized_datasets["train"]
+            self.eval_dataset = self.tokenized_datasets["validation"]
 
-    # Log a few random samples from the training set:
-    for index in random.sample(range(len(train_dataset)), 3):
-        print(f"Sample {index} of the training set: {train_dataset[index]}.")
+            # Log a few random samples from the training set:
+            for index in random.sample(range(len(self.train_dataset)), 3):
+                print(f"Sample {index} of the training set: {self.train_dataset[index]}.")
 
-    # DataLoaders creation:
-    train_dataloader = DataLoader(
-        train_dataset, shuffle=True, collate_fn=model_finetuner.collate_fn, batch_size=train_args.per_device_train_batch_size
-    )
-    eval_dataloader = DataLoader(
-        eval_dataset, collate_fn=model_finetuner.collate_fn, batch_size=train_args.per_device_eval_batch_size
-    )
+        def train_dataloader(self) -> Union[DataLoader, List[DataLoader], Dict[str, DataLoader]]:
+
+            return DataLoader(
+                self.train_dataset, shuffle=True, collate_fn=model_finetuner.collate_fn, batch_size=train_args.per_device_train_batch_size
+            )
+
+        def val_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
+
+            return DataLoader(
+                self.eval_dataset, collate_fn=model_finetuner.collate_fn, batch_size=train_args.per_device_eval_batch_size
+            )
+
+    data_module = FSDataModule()
 
     logger.log_hyperparams(asdict(train_args))
     print(train_args)
@@ -176,10 +192,11 @@ def train_lm(model, tokenizer, train_set, task_name, train_args):
         min_steps=train_args.min_train_steps,
         gradient_clip_val=train_args.gradient_clip_val,
         callbacks=[checkpoint_callback, lr_monitor],
+        accelerator='ddp_sharded'
         # log_every_n_steps=1,
         # flush_logs_every_n_steps=1
     )
-    trainer.fit(model_finetuner, train_dataloader, eval_dataloader)
+    trainer.fit(model_finetuner, data_module)
     print(f"best checkpoint is: {checkpoint_callback.best_model_path}")
     test_model = model_cls.load_from_checkpoint(checkpoint_callback.best_model_path)
 
