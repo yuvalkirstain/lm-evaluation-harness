@@ -4,7 +4,25 @@
     "mrqa_triviaqa",
     "mrqa_triviaqa_open",
     "mrqa_natural_questions",
-    "mrqa_natural_questions_open"
+    "mrqa_natural_questions_open",
+    "arc_easy",
+    "cola",
+    "rte",
+    "sst",
+    "boolq",
+    "copa",
+    "wic",
+    "multirc",
+    "openbookqa",
+    "anli_r1",
+    "winogrande",
+    "triviaqa",
+    "race",
+    "nq_open",
+    "piqa",
+    "squad2",
+    "squad1",
+    "drop"
   ],
   "n_shots": [
     0
