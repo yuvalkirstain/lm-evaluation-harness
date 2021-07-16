@@ -22,13 +22,10 @@
     128
   ],
   "min_steps": [
-    256,
-    1024
+    256
   ],
   "seeds": [
-    42,
-    43,
-    44
+    42
   ],
   "results_dir": "/home/olab/kirstain/lm-evaluation-harness/results_arzi",
   "temp_dir": "/home/olab/kirstain/lm-evaluation-harness/tmp/"
