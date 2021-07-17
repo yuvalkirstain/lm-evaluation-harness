@@ -1,5 +1,5 @@
 {
-  "project_name": "tests",
+  "project_name": "tests-xl",
   "lr_scheduler_type": "linear",
   "dropouts": [
     0.1
@@ -14,9 +14,10 @@
     1
   ],
   "tasks": [
-    "rte",
     "squad1",
-    "nq_open"
+    "nq_open",
+    "arc_easy",
+    "mrqa_triviaqa"
   ],
   "n_shots": [
     128
