@@ -42,7 +42,7 @@ srun sh {script_name}
     with open(script_name, "w") as f:
         run_script = f"""#!/bin/bash -x
 cd /home/olab/kirstain/lm-evaluation-harness
-export COMET_PROJECT="{model_base_name}-{project_name}"
+export COMET_PROJECT="{model_base_name}-{project_name}-{task}"
 bash slurm/run_single_experiment.sh {model} {task} {n_shot} {cur_output_path} {dropout} {decay} {lr} {train} {optimizer} {model_type} {lr_scheduler_type} {train_batch_size} {grad_accu} {save_pre} {gradient_clip_val} {min_step} {seed}
 """
         f.write(run_script)
