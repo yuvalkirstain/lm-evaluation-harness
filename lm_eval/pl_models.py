@@ -3,7 +3,8 @@ from typing import List, Dict, Union
 import torch
 import pytorch_lightning as pl
 from lm_eval.linear_scheduler_with_warmup import LinearSchedulerWithWarmup
-from lm_eval.utils import ValResult
+from fairscale.nn import checkpoint_wrapper, auto_wrap
+
 from transformers import (
     AdamW,
     Adafactor,
@@ -32,8 +33,12 @@ class LitGPT2(pl.LightningModule):
         self.tokenizer = tokenizer
         self.save_hyperparameters()
 
+    def configure_sharded_model(self):
+        self.model = self.model
+
     def forward(self, batch):
         # in lightning, forward defines the prediction/inference actions
+        self.model.parallelize()
         outputs = self.model(**batch, return_dict=False)
         return outputs
 
@@ -78,6 +83,7 @@ class LitGPT2(pl.LightningModule):
         val_acc = torch.stack([x["val_acc"] for x in outputs]).mean()
         self.log(VAL_LOSS, loss, prog_bar=True, sync_dist=True, logger=True)  # default on val/test is on_epoch only
         self.log(VAL_ACC, val_acc, prog_bar=True, sync_dist=True, logger=True)
+        return {"val_loss": loss, "val_acc": val_acc}
 
     def configure_optimizers(self):
         # Split weights in two groups, one with weight decay and the other not.
@@ -161,7 +167,8 @@ class LitT5(LitGPT2):
             },
         ]
 
-        optimizer = Adafactor(optimizer_grouped_parameters, scale_parameter=False, relative_step=False, warmup_init=False,
+        optimizer = Adafactor(optimizer_grouped_parameters, scale_parameter=False, relative_step=False,
+                              warmup_init=False,
                               lr=self.learning_rate)
 
         # lr_scheduler = get_scheduler(
@@ -195,11 +202,13 @@ class LitT5(LitGPT2):
                 "labels": torch.tensor(labels)}
 
     def tokenize_function(self, examples):
-        full_texts = [context.strip() + "<extra_id_0>." if "<extra_id_0>" not in context else context for context in examples["context"]]
+        full_texts = [context.strip() + "<extra_id_0>." if "<extra_id_0>" not in context else context for context in
+                      examples["context"]]
         data = self.tokenizer(full_texts)
         data["labels"] = \
-            self.tokenizer(["<extra_id_0> " + completion.strip() + "<extra_id_1>" for completion in examples["completion"]],
-                           add_special_tokens=False)["input_ids"]
+            self.tokenizer(
+                ["<extra_id_0> " + completion.strip() + "<extra_id_1>" for completion in examples["completion"]],
+                add_special_tokens=False)["input_ids"]
         for k in data:
             for i in range(len(data[k])):
                 data[k][i] = data[k][i][-self.tokenizer.model_max_length:]

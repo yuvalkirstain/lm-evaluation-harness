@@ -82,9 +82,13 @@ def load_raw_datasests(train_set, save_prefix):
 
 
 def get_monitor_name(task_name):
-    if task_name in ["arc_easy", "copa", "openbookqa", "lambada_cloze", "triviaqa", "piqa", "webqs", "nq_open", "winogrande", "race", "race_middle", "mrqa_natural_questions", "mrqa_natural_questions_open", "mrqa_triviaqa", "mrqa_triviaqa_open"]:
+    if task_name in ["arc_easy", "copa", "openbookqa", "lambada_cloze", "triviaqa", "piqa", "webqs", "nq_open",
+                     "winogrande", "race", "race_middle", "mrqa_natural_questions", "mrqa_natural_questions_open",
+                     "mrqa_triviaqa", "mrqa_triviaqa_open"]:
         return VAL_LOSS, "min"
-    elif task_name in ["rte", "sst", "wic", "multirc", "anli_r1", "wsc", "boolq", "squad2", "squad1", "drop", "piqa_extractive", "copa_extractive", "winogrande_non_partial", "winogrande_explicit", "copa_explicit", "copa_timo"]:
+    elif task_name in ["rte", "sst", "wic", "multirc", "anli_r1", "wsc", "boolq", "squad2", "squad1", "drop",
+                       "piqa_extractive", "copa_extractive", "winogrande_non_partial", "winogrande_explicit",
+                       "copa_explicit", "copa_timo"]:
         return VAL_ACC, "max"
     else:
         raise ValueError(f"We don't support task {task_name}")
@@ -124,7 +128,8 @@ def train_lm(model, tokenizer, train_set, task_name, train_args):
 
     # Scheduler and math around the number of training steps.
     # TODO not sure if this is accurate for multi-gpu
-    num_update_steps_per_epoch = math.ceil(len(raw_datasets["train"]) / (train_args.gradient_accumulation_steps * train_args.per_device_train_batch_size))
+    num_update_steps_per_epoch = math.ceil(
+        len(raw_datasets["train"]) / (train_args.gradient_accumulation_steps * train_args.per_device_train_batch_size))
     if train_args.num_train_epochs * num_update_steps_per_epoch < train_args.min_train_steps and train_args.max_train_steps is None:
         train_args.max_train_steps = train_args.min_train_steps
     if train_args.max_train_steps is None:
@@ -132,7 +137,8 @@ def train_lm(model, tokenizer, train_set, task_name, train_args):
     else:
         train_args.num_train_epochs = math.ceil(train_args.max_train_steps / num_update_steps_per_epoch)
 
-    train_args.num_warmup_steps = max(train_args.min_warmup_steps, int(train_args.max_train_steps * train_args.warmup_ratio))
+    train_args.num_warmup_steps = max(train_args.min_warmup_steps,
+                                      int(train_args.max_train_steps * train_args.warmup_ratio))
 
     model_cls = LitGPT2 if train_args.model_type == "gpt2" else LitT5
     model_finetuner = model_cls(model,
@@ -143,47 +149,34 @@ def train_lm(model, tokenizer, train_set, task_name, train_args):
                                 train_args.learning_rate,
                                 tokenizer)
 
-    class FSDataModule(pl.LightningDataModule):
-        def __init__(self):
-            super().__init__()
-            self.tokenized_datasets = None
-            self.train_dataset = None
-            self.eval_dataset = None
+    tokenized_datasets = raw_datasets.map(
+        model_finetuner.tokenize_function,
+        batched=True,
+        num_proc=train_args.preprocessing_num_workers,
+        remove_columns=column_names,
+        load_from_cache_file=not train_args.overwrite_cache,
+    )
+    tokenized_datasets = tokenized_datasets
+    train_dataset = tokenized_datasets["train"]
+    eval_dataset = tokenized_datasets["validation"]
 
-        def setup(self, stage: Optional[str] = None) -> None:
-            tokenized_datasets = raw_datasets.map(
-                model_finetuner.tokenize_function,
-                batched=True,
-                num_proc=train_args.preprocessing_num_workers,
-                remove_columns=column_names,
-                load_from_cache_file=not train_args.overwrite_cache,
-            )
-            self.tokenized_datasets = tokenized_datasets
-            self.train_dataset = self.tokenized_datasets["train"]
-            self.eval_dataset = self.tokenized_datasets["validation"]
+    # Log a few random samples from the training set:
+    for index in random.sample(range(len(train_dataset)), 3):
+        print(f"Sample {index} of the training set: {train_dataset[index]}.")
 
-            # Log a few random samples from the training set:
-            for index in random.sample(range(len(self.train_dataset)), 3):
-                print(f"Sample {index} of the training set: {self.train_dataset[index]}.")
+    train_dataloader = DataLoader(
+        train_dataset, shuffle=True, collate_fn=model_finetuner.collate_fn,
+        batch_size=train_args.per_device_train_batch_size
+    )
 
-        def train_dataloader(self) -> Union[DataLoader, List[DataLoader], Dict[str, DataLoader]]:
-
-            return DataLoader(
-                self.train_dataset, shuffle=True, collate_fn=model_finetuner.collate_fn, batch_size=train_args.per_device_train_batch_size
-            )
-
-        def val_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
-
-            return DataLoader(
-                self.eval_dataset, collate_fn=model_finetuner.collate_fn, batch_size=train_args.per_device_eval_batch_size
-            )
-
-    data_module = FSDataModule()
+    val_dataloader = DataLoader(
+        eval_dataset, collate_fn=model_finetuner.collate_fn, batch_size=train_args.per_device_eval_batch_size
+    )
 
     logger.log_hyperparams(asdict(train_args))
     print(train_args)
     trainer = pl.Trainer(
-        gpus=-1,
+        gpus="0",
         accumulate_grad_batches=train_args.gradient_accumulation_steps,
         plugins=None,
         precision=32,
@@ -191,12 +184,13 @@ def train_lm(model, tokenizer, train_set, task_name, train_args):
         max_steps=train_args.max_train_steps,
         min_steps=train_args.min_train_steps,
         gradient_clip_val=train_args.gradient_clip_val,
-        callbacks=[checkpoint_callback, lr_monitor],
-        accelerator='ddp_sharded'
+        callbacks=[checkpoint_callback, lr_monitor]
+        # accelerator='ddp_sharded'
         # log_every_n_steps=1,
         # flush_logs_every_n_steps=1
     )
-    trainer.fit(model_finetuner, data_module)
+
+    trainer.fit(model_finetuner, train_dataloader, val_dataloader)
     print(f"best checkpoint is: {checkpoint_callback.best_model_path}")
     test_model = model_cls.load_from_checkpoint(checkpoint_callback.best_model_path)
 

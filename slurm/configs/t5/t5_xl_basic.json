@@ -8,9 +8,9 @@
   ],
   "batch_and_grad_accu": [
     [
-      1,
+      8,
       4
     ]
   ],
-  "gpus": 8
+  "gpus": 4
 }
