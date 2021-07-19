@@ -31,7 +31,6 @@
     "boolq",
     "copa",
     "wic",
-    "multirc",
     "openbookqa",
     "anli_r1",
     "winogrande",
