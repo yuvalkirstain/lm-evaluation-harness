@@ -5,6 +5,7 @@
     "mrqa_triviaqa_open",
     "mrqa_natural_questions",
     "mrqa_natural_questions_open",
+    "commonsense_qa",
     "arc_easy",
     "cola",
     "rte",

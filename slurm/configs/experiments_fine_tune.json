@@ -25,6 +25,7 @@
     "mrqa_natural_questions",
     "mrqa_natural_questions_open",
     "arc_easy",
+    "commonsense_qa",
     "cola",
     "rte",
     "sst",
