@@ -26,7 +26,6 @@
     "mrqa_natural_questions_open",
     "arc_easy",
     "commonsense_qa",
-    "cola",
     "rte",
     "sst",
     "boolq",
