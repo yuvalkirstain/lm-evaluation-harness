@@ -7,7 +7,6 @@
     "mrqa_natural_questions_open",
     "commonsense_qa",
     "arc_easy",
-    "cola",
     "rte",
     "sst",
     "boolq",
