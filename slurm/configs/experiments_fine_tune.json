@@ -40,7 +40,8 @@
     "piqa",
     "squad2",
     "squad1",
-    "drop"
+    "drop",
+    "openbookqa_unifiedqa"
   ],
   "n_shots": [
     32,
