@@ -61,7 +61,7 @@ class ARCEasyExtractive(ARCEasy):
         options_str = "\n".join([f"{letter}: {option}" for letter, option in zip(doc["choices"]["label"], doc["choices"]["text"])])
         out_doc = {
             "id": doc["id"],
-            "query": f"\nOptions: {options_str}" + "Question: " + doc["question"] + "\nAnswer:",
+            "query": f"Question: {doc['question']}\nCandidates:\n{options_str}\nAnswer:",
             "choices": doc["choices"]["text"],
             "gold": ["A", "B", "C", "D", "E"].index(doc["answerKey"]),
         }

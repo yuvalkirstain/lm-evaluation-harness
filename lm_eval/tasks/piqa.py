@@ -47,7 +47,7 @@ class PiQACls(PiQA):
         return text
 
 
-class PiQAExt(PiQA):
+class PiQAExtractive(PiQA):
     def _convert_standard(self, doc):
         out_doc = {
             "goal": doc["goal"],
@@ -57,7 +57,7 @@ class PiQAExt(PiQA):
         return out_doc
 
     def doc_to_text(self, doc):
-        text = "A: " + doc["choices"][0] + "\nB: " + doc["choices"][1] + "\nQuestion: " + doc["goal"] + "\nAnswer:"
+        text = f"Question: {doc['goal']}\nCandidates:\nA: {doc['choices'][0]}\nB: {doc['choices'][1]}\nAnswer:"
         return text
 
     def construct_requests(self, doc, ctx):

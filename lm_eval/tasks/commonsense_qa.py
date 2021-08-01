@@ -34,8 +34,8 @@ class CommonsenseQA(HFTask, MultipleChoiceTask):
         return "Question: " + doc["question"] + "\nAnswer:"
 
 
-class CommonsenseQAExt(CommonsenseQA):
+class xCommonsenseQAExtractive(CommonsenseQA):
 
     def doc_to_text(self, doc):
-        context = '\n'.join([f"{label}: {choice}" for label, choice in zip(doc["labels"], doc["choices"])])
-        return f"{context}\nQuestion: " + doc["question"] + "\nAnswer:"
+        candidates = '\n'.join([f"{label}: {choice}" for label, choice in zip(doc["labels"], doc["choices"])])
+        return f"Question: {doc['question']}\nCandidates:\n{candidates}\nAnswer:"

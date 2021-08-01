@@ -41,7 +41,10 @@
     "squad2",
     "squad1",
     "drop",
-    "openbookqa_unifiedqa"
+    "piqa_extractive",
+    "copa_extractive",
+    "arc_easy_extractive",
+    "commonsense_qa_extractive"
   ],
   "n_shots": [
     32,

@@ -88,7 +88,7 @@ def get_monitor_name(task_name):
         return VAL_LOSS, "min"
     elif task_name in ["rte", "sst", "wic", "multirc", "anli_r1", "wsc", "boolq", "squad2", "squad1", "drop",
                        "piqa_extractive", "copa_extractive", "winogrande_non_partial", "winogrande_explicit",
-                       "copa_explicit", "copa_timo"]:
+                       "copa_explicit", "copa_timo", "piqa_extractive", "copa_extractive", "arc_easy_extractive", "commonsense_qa_extractive"]:
         return VAL_ACC, "max"
     else:
         raise ValueError(f"We don't support task {task_name}")

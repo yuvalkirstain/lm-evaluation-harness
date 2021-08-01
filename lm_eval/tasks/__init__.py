@@ -176,14 +176,14 @@ TASK_REGISTRY = {
 
     # Yuval additions
     "piqa_cls": piqa.PiQACls,
-    "piqa_extractive": piqa.PiQAExt,
-    "copa_explicit": superglue.CopaExplicit,
+    "piqa_extractive": piqa.PiQAExtractive,
+    "copa_extractive": superglue.CopaExtractive,
     "arc_easy_cls": arc.ARCEasyCls,
     "arc_easy_extractive": arc.ARCEasyExtractive,
     "sst_lm": glue.SSTLM,
     "multirc_prompt": superglue.MultiRCPrompt,
     "commonsense_qa": commonsense_qa.CommonsenseQA,
-    "commonsense_qa_extractive": commonsense_qa.CommonsenseQAExt,
+    "commonsense_qa_extractive": commonsense_qa.CommonsenseQAExtractive,
     "squad1": squad.SQuAD1,
     "nq_open": nq_open.NQOpen,
     "winogrande_explicit": winogrande.WinograndeExplicit,

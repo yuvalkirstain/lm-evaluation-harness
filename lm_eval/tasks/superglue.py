@@ -197,7 +197,7 @@ class Copa(HFTask):
         return choice[0].lower() + choice[1:]
 
 
-class CopaExplicit(Copa):
+class CopaExtractive(Copa):
 
     @staticmethod
     def connector_to_q(connector):
@@ -210,7 +210,7 @@ class CopaExplicit(Copa):
 
     def doc_to_text(self, doc):
         # Drop the period
-        return f"Premise: {doc['premise'].strip()} {self.connector_to_q(doc['question'])}\nAlternative 1: {doc['choice1']}\nAlternative 2: {doc['choice2']}\nAnswer:"
+        return f"Premise: {doc['premise'].strip()} {self.connector_to_q(doc['question'])}\nCandidates\nA: {doc['choice1']}\nB: {doc['choice2']}\nAnswer:"
 
     def doc_to_target(self, doc):
         correct_choice = doc["choice1"] if doc["label"] == 0 else doc["choice2"]
