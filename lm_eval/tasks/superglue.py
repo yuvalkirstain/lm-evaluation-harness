@@ -62,6 +62,11 @@ class BoolQ(HFTask):
         }
 
 
+class BoolQOpen(BoolQ):
+    def doc_to_text(self, doc):
+        return f"Question: {doc['question']}\nAnswer:"
+
+
 class CommitmentBank(HFTask):
     DATASET_PATH = "super_glue"
     DATASET_NAME = "cb"

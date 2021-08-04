@@ -25,7 +25,8 @@
     "piqa_extractive",
     "copa_extractive",
     "arc_easy_extractive",
-    "commonsense_qa_extractive"
+    "commonsense_qa_extractive",
+    "boolq_open"
   ],
   "n_shots": [
     0
