@@ -4,6 +4,8 @@ import json
 import re
 import string
 from collections import Counter
+from random import shuffle
+from string import ascii_uppercase
 from lm_eval.base import Task, rf
 from ..metrics import mean
 from ..utils import sh
@@ -192,6 +194,41 @@ class MRQANaturalQuestions(MRQA):
     wget https://s3.us-east-2.amazonaws.com/mrqa/release/v2/{subset}/NaturalQuestionsShort.jsonl.gz -O {self.data_dir}/{self.dataset_name}_{subset}.jsonl.gz
     gunzip {self.data_dir}/{self.dataset_name}_{subset}.jsonl.gz
     """)
+
+
+class MRQANaturalQuestionsV3(MRQA):
+    def __init__(self):
+        self.dataset_name = 'nq_v3'
+        super().__init__()
+
+    def download(self):
+        if not os.path.exists(self.data_dir):
+            for subset in ['train', 'dev']:
+                sh(f"""
+    mkdir -p {self.data_dir}
+    wget https://dl.fbaipublicfiles.com/when_do_billions/nq_multiple_choice/natural_questions_{subset}.multiple_choice.v3.jsonl.gz -O {self.data_dir}/{self.dataset_name}_{subset}.jsonl.gz
+    gunzip -d {self.data_dir}/{self.dataset_name}_{subset}.jsonl.gz
+    """)
+
+
+class MRQANaturalQuestionsV3Open(MRQANaturalQuestionsV3):
+    def doc_to_text(self, doc):
+        assert len(doc["qas"]) == 1
+        qa = doc['qas'][0]
+        return 'Question: ' + qa['question'] + '\n\n' + 'Answer:'
+
+
+class MRQANaturalQuestionsV3MC(MRQANaturalQuestionsV3):
+    def doc_to_text(self, doc):
+        assert len(doc["qas"]) == 1
+        qa = doc['qas'][0]
+        candidates = list({candidate for candidate, candidate_type in qa["candidates"]})
+        shuffle(candidates)
+        text = f"Question: {qa['question']}\n\n"
+        for char, candidate in zip(ascii_uppercase, candidates):
+            text += f"{char}: {candidate}\n"
+        text += '\nAnswer:'
+        return text
 
 
 class MRQATriviaQAOpen(MRQATriviaQA):

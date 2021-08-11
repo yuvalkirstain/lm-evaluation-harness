@@ -197,7 +197,10 @@ TASK_REGISTRY = {
     "mrqa_natural_questions_open": mrqa.MRQANaturalQuestionsOpen,
     "copa_timo": superglue.CopaTimo,
     "openbookqa_unifiedqa": openbookqa.OpenBookQAUnifiedQA,
-    "boolq_open": superglue.BoolQOpen
+    "boolq_open": superglue.BoolQOpen,
+    "nq_v3": mrqa.MRQANaturalQuestionsV3,
+    "nq_v3_open": mrqa.MRQANaturalQuestionsV3Open,
+    "nq_v3_mc": mrqa.MRQANaturalQuestionsV3MC
 }
 
 ALL_TASKS = sorted(list(TASK_REGISTRY))
@@ -208,7 +211,7 @@ def get_task(task_name):
         return TASK_REGISTRY[task_name]
     except KeyError as e:
         print("Available tasks:")
-        pprint(TASK_REGISTRY)
+        print(TASK_REGISTRY)
         raise KeyError(f"Missing task {task_name}")
 
 

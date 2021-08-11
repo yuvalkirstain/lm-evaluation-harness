@@ -26,7 +26,10 @@
     "copa_extractive",
     "arc_easy_extractive",
     "commonsense_qa_extractive",
-    "boolq_open"
+    "boolq_open",
+    "nq_v3",
+    "nq_v3_open",
+    "nq_v3_mc"
   ],
   "n_shots": [
     0
