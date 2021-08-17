@@ -1,12 +1,16 @@
 import datasets
 from math import exp
 
+from datasets import load_dataset, DatasetDict
 from transformers.data.metrics import squad_metrics
 
 from lm_eval.base import rf
 from lm_eval.metrics import f1_score, mean
 from .common import HFTask
 from functools import partial
+
+from ..utils import sh
+
 
 class NQOpen(HFTask):
     DATASET_PATH = "nq_open"
@@ -93,3 +97,23 @@ class NQOpen(HFTask):
             'f1': True,  # The F-score of predicted tokens versus the gold answer
         }
 
+
+class NQOpenNoOverlap(NQOpen):
+    def __init__(self):
+        self.data_dir = f'data/nq_open/'
+        self.test_path = f"{self.data_dir}/nq-test.qa.no_overlap.json"
+        super().__init__()
+
+    def download(self):
+        super().download()
+        sh(f"""
+            mkdir -p {self.data_dir}
+            wget https://dl.fbaipublicfiles.com/when_do_billions/nq-test.qa.no_overlap.jsonl -O {self.test_path}
+            """)
+        self.data["test"] = load_dataset('json', data_files=self.test_path)["train"]
+
+    def has_validation_docs(self):
+        return False
+
+    def has_test_docs(self):
+        return True

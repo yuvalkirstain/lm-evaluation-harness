@@ -3,7 +3,7 @@ from typing import List, Dict, Union
 import torch
 import pytorch_lightning as pl
 from lm_eval.linear_scheduler_with_warmup import LinearSchedulerWithWarmup
-from fairscale.nn import checkpoint_wrapper, auto_wrap
+
 
 from transformers import (
     AdamW,

@@ -2,6 +2,8 @@ import collections
 import itertools
 import random
 
+import torch.cuda
+
 from lm_eval.train_pl import train_lm
 
 
@@ -51,7 +53,7 @@ def evaluate(lm, task_dict, provide_description, num_fewshot, limit, train_args,
             results[task_name]["train_args"] = task_train_args
 
         if "dummy" not in model_args:
-            if "t5" in model_args:
+            if "t5" in model_args and torch.cuda.is_available():
                 lm.model.parallelize()
             else:
                 lm.model.to(lm.device)

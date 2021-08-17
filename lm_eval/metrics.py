@@ -6,6 +6,8 @@ import numpy as np
 import sacrebleu
 import sklearn
 
+from rouge_score import rouge_scorer
+
 
 def mean(arr):
     return sum(arr) / len(arr)
@@ -77,6 +79,17 @@ def bleu(items):
     preds = list(zip(*items))[1]
     refs, preds = _sacreformat(refs, preds)
     return sacrebleu.corpus_bleu(preds, refs).score
+
+
+def rouge(references, pred):
+    rouge_names = ['rouge1', 'rouge2', 'rougeL']
+    scorer = rouge_scorer.RougeScorer(rouge_names, use_stemmer=True)
+    scores = {rouge_name: 0 for rouge_name in rouge_names}
+    for reference in references:
+        ref_scores = scorer.score(reference, pred)
+        for rouge_name, cur_score in scores.items():
+            scores[rouge_name] = max(scores[rouge_name], ref_scores[rouge_name].fmeasure)
+    return scores
 
 
 def chrf(items):

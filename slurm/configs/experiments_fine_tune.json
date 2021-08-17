@@ -48,7 +48,8 @@
     "boolq_open",
     "nq_v3",
     "nq_v3_open",
-    "nq_v3_mc"
+    "nq_v3_mc",
+    "nq_open_no_overlap"
   ],
   "n_shots": [
     32,

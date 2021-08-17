@@ -2,7 +2,7 @@ from pprint import pprint
 
 import sacrebleu
 
-from . import superglue
+from . import superglue, generation
 from . import mrqa
 from . import glue
 from . import arc
@@ -186,6 +186,7 @@ TASK_REGISTRY = {
     "commonsense_qa_extractive": commonsense_qa.CommonsenseQAExtractive,
     "squad1": squad.SQuAD1,
     "nq_open": nq_open.NQOpen,
+    "nq_open_no_overlap": nq_open.NQOpenNoOverlap,
     "winogrande_explicit": winogrande.WinograndeExplicit,
     "winogrande_t5": winogrande.WinograndeT5,
     "copa_t5": superglue.CopaT5,
@@ -200,7 +201,10 @@ TASK_REGISTRY = {
     "boolq_open": superglue.BoolQOpen,
     "nq_v3": mrqa.MRQANaturalQuestionsV3,
     "nq_v3_open": mrqa.MRQANaturalQuestionsV3Open,
-    "nq_v3_mc": mrqa.MRQANaturalQuestionsV3MC
+    "nq_v3_mc": mrqa.MRQANaturalQuestionsV3MC,
+    "xsum": generation.XSum,
+    "common_gen": generation.CommonGen,
+    "asset": generation.Asset
 }
 
 ALL_TASKS = sorted(list(TASK_REGISTRY))
