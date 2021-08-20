@@ -1,4 +1,5 @@
 import abc
+import copy
 import os
 import json
 import re
@@ -77,9 +78,15 @@ class MRQA(Task, abc.ABC):
 
     @staticmethod
     def read_jsonl_with_header(path):
+        split = []
         with open(path) as f:
             f.readline()
-            split = list(map(json.loads, f))
+            for line in f:
+                data_point = json.loads(line)
+                for qa in data_point["qas"]:
+                    single_question_data_point = copy.deepcopy(data_point)
+                    single_question_data_point["qas"] = [qa]
+                    split.append(single_question_data_point)
         return split
 
     def training_docs(self):
@@ -243,3 +250,42 @@ class MRQANaturalQuestionsOpen(MRQANaturalQuestions):
         assert len(doc["qas"]) == 1
         qa = doc['qas'][0]
         return 'Question: ' + qa['question'] + '\n\n' + 'Answer:'
+
+
+class MRQASQuADNaturalQuestions(MRQA):
+    def __init__(self):
+        self.dataset_name = 'ood_natural_questions'
+        super().__init__()
+
+    def download(self):
+        if not os.path.exists(self.data_dir):
+            sh(f"""
+                mkdir -p {self.data_dir}
+                wget https://s3.us-east-2.amazonaws.com/mrqa/release/v2/dev/SQuAD.jsonl.gz -O {self.data_dir}/{self.dataset_name}_train.jsonl.gz
+                gunzip {self.data_dir}/{self.dataset_name}_train.jsonl.gz
+                """)
+            sh(f"""
+                mkdir -p {self.data_dir}
+                wget https://s3.us-east-2.amazonaws.com/mrqa/release/v2/dev/NaturalQuestionsShort.jsonl.gz -O {self.data_dir}/{self.dataset_name}_dev.jsonl.gz
+                gunzip {self.data_dir}/{self.dataset_name}_dev.jsonl.gz
+                """)
+
+
+class MRQASQuADDrop(MRQA):
+    def __init__(self):
+        self.dataset_name = 'ood_drop'
+        super().__init__()
+
+    def download(self):
+        if not os.path.exists(self.data_dir):
+            sh(f"""
+                mkdir -p {self.data_dir}
+                wget https://s3.us-east-2.amazonaws.com/mrqa/release/v2/dev/SQuAD.jsonl.gz -O {self.data_dir}/{self.dataset_name}_train.jsonl.gz
+                gunzip {self.data_dir}/{self.dataset_name}_train.jsonl.gz
+                """)
+            sh(f"""
+                mkdir -p {self.data_dir}
+                wget https://s3.us-east-2.amazonaws.com/mrqa/release/v2/dev/DROP.jsonl.gz -O {self.data_dir}/{self.dataset_name}_dev.jsonl.gz
+                gunzip {self.data_dir}/{self.dataset_name}_dev.jsonl.gz
+                """)
+

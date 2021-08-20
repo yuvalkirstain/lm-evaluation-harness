@@ -204,7 +204,9 @@ TASK_REGISTRY = {
     "nq_v3_mc": mrqa.MRQANaturalQuestionsV3MC,
     "xsum": generation.XSum,
     "common_gen": generation.CommonGen,
-    "asset": generation.Asset
+    "asset": generation.Asset,
+    "squad_natural_questions": mrqa.MRQASQuADNaturalQuestions,
+    "squad_drop": mrqa.MRQASQuADDrop
 }
 
 ALL_TASKS = sorted(list(TASK_REGISTRY))
