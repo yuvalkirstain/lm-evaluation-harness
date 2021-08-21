@@ -206,7 +206,8 @@ TASK_REGISTRY = {
     "common_gen": generation.CommonGen,
     "asset": generation.Asset,
     "squad_natural_questions": mrqa.MRQASQuADNaturalQuestions,
-    "squad_drop": mrqa.MRQASQuADDrop
+    "squad_drop": mrqa.MRQASQuADDrop,
+    "arc_easy_ir": arc.ARCEasyIR
 }
 
 ALL_TASKS = sorted(list(TASK_REGISTRY))
