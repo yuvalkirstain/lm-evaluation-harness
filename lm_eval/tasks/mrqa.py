@@ -203,6 +203,36 @@ class MRQANaturalQuestions(MRQA):
     """)
 
 
+class MRQAHotPotQA(MRQA):
+    def __init__(self):
+        self.dataset_name = 'hotpotqa'
+        super().__init__()
+
+    def download(self):
+        if not os.path.exists(self.data_dir):
+            for subset in ['train', 'dev']:
+                sh(f"""
+    mkdir -p {self.data_dir}
+    wget https://s3.us-east-2.amazonaws.com/mrqa/release/v2/{subset}/HotpotQA.jsonl.gz -O {self.data_dir}/{self.dataset_name}_{subset}.jsonl.gz
+    gunzip {self.data_dir}/{self.dataset_name}_{subset}.jsonl.gz
+    """)
+
+
+class MRQANewsQA(MRQA):
+    def __init__(self):
+        self.dataset_name = 'searchqa'
+        super().__init__()
+
+    def download(self):
+        if not os.path.exists(self.data_dir):
+            for subset in ['train', 'dev']:
+                sh(f"""
+    mkdir -p {self.data_dir}
+    wget https://s3.us-east-2.amazonaws.com/mrqa/release/v2/{subset}/SearchQA.jsonl.gz -O {self.data_dir}/{self.dataset_name}_{subset}.jsonl.gz
+    gunzip {self.data_dir}/{self.dataset_name}_{subset}.jsonl.gz
+    """)
+
+
 class MRQANaturalQuestionsV3(MRQA):
     def __init__(self):
         self.dataset_name = 'nq_v3'

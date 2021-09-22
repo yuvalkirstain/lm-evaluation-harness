@@ -90,7 +90,8 @@ def get_monitor_name(task_name):
     elif task_name in ["rte", "sst", "wic", "multirc", "anli_r1", "wsc", "boolq", "squad2", "squad1", "drop",
                        "piqa_extractive", "copa_extractive", "winogrande_non_partial", "winogrande_explicit",
                        "copa_explicit", "copa_timo", "piqa_extractive", "copa_extractive", "arc_easy_extractive",
-                       "commonsense_qa_extractive", "squad_drop", "squad_natural_questions", "arc_easy_ir"]:
+                       "commonsense_qa_extractive", "squad_drop", "squad_natural_questions", "arc_easy_ir",
+                       "mrqa_hotpotqa", "mrqa_newsqa"]:
         return VAL_ACC, "max"
     else:
         raise ValueError(f"We don't support task {task_name}")
