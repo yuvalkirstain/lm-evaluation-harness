@@ -132,16 +132,24 @@ class WebQsOurs(NQOpen):
     def has_test_docs(self):
         return True
 
-    def process_results(self, doc, results):
-        """Take a single document and the LM results_old and evaluates, returning a
-        dict where keys are the names of submetrics and values are the values of
-        the metric for that one document
+    def _convert_standard(self, doc):
+        out_doc = {'url': doc["url"],
+                   'question': doc["question"],
+                   'answer': doc["answers"]}
+        return out_doc
 
-        :param doc:
-            The document as returned from training_docs, validation_docs, or test_docs.
-        :param results:
-            The results_old of the requests created in construct_requests.
-        """
-        continuation, = results
+    def training_docs(self):
+        # Cache training for faster few-shot.
+        # If data is too large to fit in memory, override this method.
+        if self.has_training_docs():
+            if self._training_docs is None:
+                self._training_docs = list(map(self._convert_standard, self.data["train"]))
+            return self._training_docs
 
-        return self.compute_scores(doc['answers'], continuation)
+    def validation_docs(self):
+        if self.has_validation_docs():
+            return map(self._convert_standard, self.data["validation"])
+
+    def test_docs(self):
+        if self.has_test_docs():
+            return map(self._convert_standard, self.data["test"])

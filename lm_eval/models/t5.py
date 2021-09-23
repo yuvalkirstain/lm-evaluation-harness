@@ -1,3 +1,5 @@
+import logging
+
 import transformers
 import torch
 import torch.nn.functional as F
@@ -101,7 +103,7 @@ class T5LM(LM):
         
         reord = utils.Reorderer(requests, _collate)
 
-        for context, until in tqdm(reord.get_reordered()):
+        for i, (context, until) in enumerate(tqdm(reord.get_reordered())):
             if isinstance(until, str): until = [until]
 
             context_enc = torch.tensor([self.tokenizer.encode(context.strip() + "<extra_id_0>.")[- self.max_length:]]).to(self.device)
@@ -116,12 +118,18 @@ class T5LM(LM):
             )
 
             s = self.tokenizer.decode(cont[0].tolist()[2:-1])
+
+            if i < 20:
+                print(f"Context: {self.tokenizer.decode(context_enc[0])}\nGeneration: {s}")
+
             if "<extra_id_1>" in s:
                 s = s[:s.index("<extra_id_1>")]
             if "</s>" in s:
                 s = s[:s.index("</s>")]
             for term in until:
                 s = s.split(term)[0]
+            if i < 20:
+                print(f"Final S: {s}")
 
             # partial caching
             self.cache_hook.add_partial("greedy_until", (context, until), s)
