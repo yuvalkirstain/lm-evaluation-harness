@@ -209,7 +209,8 @@ TASK_REGISTRY = {
     "asset": generation.Asset,
     "squad_natural_questions": mrqa.MRQASQuADNaturalQuestions,
     "squad_drop": mrqa.MRQASQuADDrop,
-    "arc_easy_ir": arc.ARCEasyIR
+    "arc_easy_ir": arc.ARCEasyIR,
+    "nq_webqs": nq_open.WebQsOurs
 }
 
 ALL_TASKS = sorted(list(TASK_REGISTRY))

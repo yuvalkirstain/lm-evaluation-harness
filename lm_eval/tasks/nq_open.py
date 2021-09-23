@@ -117,3 +117,31 @@ class NQOpenNoOverlap(NQOpen):
 
     def has_test_docs(self):
         return True
+
+
+class WebQsOurs(NQOpen):
+    DATASET_PATH = "web_questions"
+    DATASET_NAME = None
+
+    def has_training_docs(self):
+        return True
+
+    def has_validation_docs(self):
+        return False
+
+    def has_test_docs(self):
+        return True
+
+    def process_results(self, doc, results):
+        """Take a single document and the LM results_old and evaluates, returning a
+        dict where keys are the names of submetrics and values are the values of
+        the metric for that one document
+
+        :param doc:
+            The document as returned from training_docs, validation_docs, or test_docs.
+        :param results:
+            The results_old of the requests created in construct_requests.
+        """
+        continuation, = results
+
+        return self.compute_scores(doc['answers'], continuation)

@@ -51,7 +51,8 @@
     "nq_v3_mc",
     "nq_open_no_overlap",
     "webqs",
-    "mrqa_hotpotqa"
+    "mrqa_hotpotqa",
+    "nq_webqs"
   ],
   "n_shots": [
     32,
