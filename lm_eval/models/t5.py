@@ -119,7 +119,7 @@ class T5LM(LM):
 
             s = self.tokenizer.decode(cont[0].tolist()[2:-1])
 
-            if i < 20:
+            if i < 100:
                 print(f"Context: {self.tokenizer.decode(context_enc[0])}\nGeneration: {s}")
 
             if "<extra_id_1>" in s:
@@ -128,7 +128,7 @@ class T5LM(LM):
                 s = s[:s.index("</s>")]
             for term in until:
                 s = s.split(term)[0]
-            if i < 20:
+            if i < 100:
                 print(f"Final S: {s}")
 
             # partial caching
