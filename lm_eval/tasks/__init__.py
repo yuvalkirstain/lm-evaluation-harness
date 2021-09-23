@@ -187,8 +187,6 @@ TASK_REGISTRY = {
     "squad1": squad.SQuAD1,
     "nq_open": nq_open.NQOpen,
     "nq_open_no_overlap": nq_open.NQOpenNoOverlap,
-    "nq_open_ssm": nq_open.NQOpenSSM,
-    "nq_open_ssm_no_overlap": nq_open.NQOpenSSMNoOverlap,
     "winogrande_explicit": winogrande.WinograndeExplicit,
     "winogrande_t5": winogrande.WinograndeT5,
     "copa_t5": superglue.CopaT5,
