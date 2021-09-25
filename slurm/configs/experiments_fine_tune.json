@@ -52,7 +52,8 @@
     "nq_open_no_overlap",
     "webqs",
     "mrqa_hotpotqa",
-    "nq_webqs"
+    "nq_webqs",
+    "open_squad1"
   ],
   "n_shots": [
     32,

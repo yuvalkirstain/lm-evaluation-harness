@@ -203,3 +203,8 @@ class SQuAD1(SQuAD2):
             'exact_match': True,  # Exact match (the normalized answer exactly match the gold answer)
             'f1': True,  # The F-score of predicted tokens versus the gold answer
         }
+
+
+class OpenSQuAD1(SQuAD1):
+    def doc_to_text(self, doc):
+        return 'Question: ' + doc['question'] + '\n' + 'Answer:'

@@ -185,6 +185,7 @@ TASK_REGISTRY = {
     "commonsense_qa": commonsense_qa.CommonsenseQA,
     "commonsense_qa_extractive": commonsense_qa.CommonsenseQAExtractive,
     "squad1": squad.SQuAD1,
+    "open_squad1": squad.OpenSQuAD1,
     "nq_open": nq_open.NQOpen,
     "nq_open_no_overlap": nq_open.NQOpenNoOverlap,
     "winogrande_explicit": winogrande.WinograndeExplicit,
