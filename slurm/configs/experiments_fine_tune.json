@@ -53,7 +53,9 @@
     "webqs",
     "mrqa_hotpotqa",
     "nq_webqs",
-    "open_squad1"
+    "open_squad1",
+    "open_newsqa_mrqa",
+    "open_searchqa_mrqa"
   ],
   "n_shots": [
     32,

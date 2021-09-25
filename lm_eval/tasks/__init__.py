@@ -211,7 +211,9 @@ TASK_REGISTRY = {
     "squad_natural_questions": mrqa.MRQASQuADNaturalQuestions,
     "squad_drop": mrqa.MRQASQuADDrop,
     "arc_easy_ir": arc.ARCEasyIR,
-    "nq_webqs": nq_open.WebQsOurs
+    "nq_webqs": nq_open.WebQsOurs,
+    "open_newsqa_mrqa": mrqa.MRQANewsQAOpen,
+    "open_searchqa_mrqa": mrqa.MRQASearchQAOpen
 }
 
 ALL_TASKS = sorted(list(TASK_REGISTRY))

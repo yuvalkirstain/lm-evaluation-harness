@@ -85,7 +85,8 @@ def get_monitor_name(task_name):
     if task_name in ["arc_easy", "copa", "openbookqa", "lambada_cloze", "triviaqa", "piqa", "webqs", "nq_open",
                      "winogrande", "race", "race_middle", "mrqa_natural_questions", "mrqa_natural_questions_open",
                      "mrqa_triviaqa", "mrqa_triviaqa_open", "commonsense_qa", "boolq_open", "nq_v3", "nq_v3_open",
-                     "nq_v3_mc", "xsum", "common_gen", "nq_open_no_overlap", "nq_webqs", "open_squad1"]:
+                     "nq_v3_mc", "xsum", "common_gen", "nq_open_no_overlap", "nq_webqs", "open_squad1", "open_newsqa",
+                     "open_newsqa_mrqa", "open_searchqa_mrqa"]:
         return VAL_LOSS, "min"
     elif task_name in ["rte", "sst", "wic", "multirc", "anli_r1", "wsc", "boolq", "squad2", "squad1", "drop",
                        "piqa_extractive", "copa_extractive", "winogrande_non_partial", "winogrande_explicit",
