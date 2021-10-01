@@ -282,7 +282,7 @@ class MRQANaturalQuestionsOpen(MRQANaturalQuestions):
         return 'Question: ' + qa['question'] + '\n' + 'Answer:'
 
 
-class MRQASearchQAOpen(MRQANaturalQuestionsOpen):
+class MRQASearchQAOpen(MRQA):
     def __init__(self):
         self.dataset_name = 'searchqa'
         super().__init__()
@@ -296,8 +296,13 @@ class MRQASearchQAOpen(MRQANaturalQuestionsOpen):
     gunzip -d {self.data_dir}/{self.dataset_name}_{subset}.jsonl.gz
     """)
 
+    def doc_to_text(self, doc):
+        assert len(doc["qas"]) == 1
+        qa = doc['qas'][0]
+        return 'Question: ' + qa['question'] + '\n' + 'Answer:'
 
-class MRQANewsQAOpen(MRQANaturalQuestionsOpen):
+
+class MRQANewsQAOpen(MRQA):
     def __init__(self):
         self.dataset_name = 'newsqa'
         super().__init__()
@@ -310,6 +315,11 @@ class MRQANewsQAOpen(MRQANaturalQuestionsOpen):
     wget https://s3.us-east-2.amazonaws.com/mrqa/release/v2/{subset}/NewsQA.jsonl.gz -O {self.data_dir}/{self.dataset_name}_{subset}.jsonl.gz
     gunzip -d {self.data_dir}/{self.dataset_name}_{subset}.jsonl.gz
     """)
+
+    def doc_to_text(self, doc):
+        assert len(doc["qas"]) == 1
+        qa = doc['qas'][0]
+        return 'Question: ' + qa['question'] + '\n' + 'Answer:'
 
 
 class MRQASQuADNaturalQuestions(MRQA):
