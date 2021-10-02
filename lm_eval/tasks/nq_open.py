@@ -1,3 +1,5 @@
+import os
+
 import datasets
 from math import exp
 
@@ -153,3 +155,27 @@ class WebQsOurs(NQOpen):
     def test_docs(self):
         if self.has_test_docs():
             return map(self._convert_standard, self.data["test"])
+
+
+class TriviaQAOurs(NQOpen):
+    def __init__(self):
+        self.data_dir = f'data/triviaqa/'
+        self.train_path = f"{self.data_dir}/triviaqa.train-train.json"
+        self.test_path = f"{self.data_dir}/triviaqa.test.jsonl"
+        super().__init__()
+
+    def download(self):
+        if not os.path.exists(self.train_path) or not os.path.exists(self.test_path):
+            sh(f"""
+                mkdir -p {self.data_dir}
+                wget https://dl.fbaipublicfiles.com/paq/v1/annotated_datasets/triviaqa.train-train.jsonl -O {self.train_path}
+                wget https://dl.fbaipublicfiles.com/paq/v1/annotated_datasets/triviaqa.test.jsonl -O {self.test_path}
+                """)
+        data_files = {"train": self.train_path, "test": self.test_path}
+        self.data = load_dataset('json', data_files=data_files)
+
+    def has_validation_docs(self):
+        return False
+
+    def has_test_docs(self):
+        return True

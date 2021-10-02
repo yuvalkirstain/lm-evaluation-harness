@@ -213,7 +213,8 @@ TASK_REGISTRY = {
     "arc_easy_ir": arc.ARCEasyIR,
     "nq_webqs": nq_open.WebQsOurs,
     "open_newsqa_mrqa_f": mrqa.MRQANewsQAOpen,
-    "open_searchqa_mrqa_f": mrqa.MRQASearchQAOpen
+    "open_searchqa_mrqa_f": mrqa.MRQASearchQAOpen,
+    "triviaqa_ours": nq_open.TriviaQAOurs
 }
 
 ALL_TASKS = sorted(list(TASK_REGISTRY))
