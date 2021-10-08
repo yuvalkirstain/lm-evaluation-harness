@@ -21,6 +21,18 @@ from dataclasses import (
     asdict
 )
 
+VAL_LOSS_TASKS = ["arc_easy", "copa", "openbookqa", "lambada_cloze", "triviaqa", "piqa", "webqs", "nq_open",
+                  "winogrande", "race", "race_middle", "mrqa_natural_questions", "mrqa_natural_questions_open",
+                  "mrqa_triviaqa", "mrqa_triviaqa_open", "commonsense_qa", "boolq_open", "nq_v3", "nq_v3_open",
+                  "nq_v3_mc", "xsum", "common_gen", "nq_open_no_overlap", "nq_webqs", "open_squad1", "open_newsqa",
+                  "open_newsqa_mrqa_f", "open_searchqa_mrqa_f", "triviaqa_ours"]
+
+VAL_EM_TASKS = ["rte", "sst", "wic", "multirc", "anli_r1", "wsc", "boolq", "squad2", "squad1", "drop",
+            "piqa_extractive", "copa_extractive", "winogrande_non_partial", "winogrande_explicit",
+            "copa_explicit", "copa_timo", "piqa_extractive", "copa_extractive", "arc_easy_extractive",
+            "commonsense_qa_extractive", "squad_drop", "squad_natural_questions", "arc_easy_ir",
+            "mrqa_hotpotqa", "mrqa_newsqa"]
+
 
 @dataclass
 class TrainArgs:
@@ -82,17 +94,9 @@ def load_raw_datasests(train_set, save_prefix):
 
 
 def get_monitor_name(task_name):
-    if task_name in ["arc_easy", "copa", "openbookqa", "lambada_cloze", "triviaqa", "piqa", "webqs", "nq_open",
-                     "winogrande", "race", "race_middle", "mrqa_natural_questions", "mrqa_natural_questions_open",
-                     "mrqa_triviaqa", "mrqa_triviaqa_open", "commonsense_qa", "boolq_open", "nq_v3", "nq_v3_open",
-                     "nq_v3_mc", "xsum", "common_gen", "nq_open_no_overlap", "nq_webqs", "open_squad1", "open_newsqa",
-                     "open_newsqa_mrqa_f", "open_searchqa_mrqa_f", "triviaqa_ours"]:
+    if task_name in VAL_LOSS_TASKS:
         return VAL_LOSS, "min"
-    elif task_name in ["rte", "sst", "wic", "multirc", "anli_r1", "wsc", "boolq", "squad2", "squad1", "drop",
-                       "piqa_extractive", "copa_extractive", "winogrande_non_partial", "winogrande_explicit",
-                       "copa_explicit", "copa_timo", "piqa_extractive", "copa_extractive", "arc_easy_extractive",
-                       "commonsense_qa_extractive", "squad_drop", "squad_natural_questions", "arc_easy_ir",
-                       "mrqa_hotpotqa", "mrqa_newsqa"]:
+    elif task_name in VAL_EM_TASKS:
         return VAL_ACC, "max"
     else:
         raise ValueError(f"We don't support task {task_name}")

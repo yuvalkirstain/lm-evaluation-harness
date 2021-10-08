@@ -1,5 +1,8 @@
 
-## Data VS Params
+## A Few More Examples May Be Worth Billions of Parameters
+
+This repo is a fork of the lm-evaluation-harness repo.
+The main changes are that we enable fine-tuning of models and evaluating T5.
 
 ### Preliminaries 
 
@@ -14,7 +17,7 @@ Set up your Comet-ml env vars:
 export COMET_API_KEY="<api key>"
 ```
 
-### Run experiments
+### Run Experiments (Slurm)
 
 Fill in the `<x>.json` config files in `configs` to make sure that the save paths are ok.
 
@@ -29,4 +32,4 @@ python slurm/send_experiments.py --configs slurm/configs/t5/t5_large_basic.json 
 ```python
 python slurm/send_experiments.py --configs slurm/configs/t5/t5_large_basic.json slurm/configs/test_slurm_fine_tune.json
 ```
-so make sure things are ok)
+to make sure that everything works ok)
