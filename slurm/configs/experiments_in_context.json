@@ -1,36 +1,24 @@
 {
-  "project_name": "experiments-fair",
+  "project_name": "experiments",
   "tasks": [
-    "mrqa_triviaqa",
-    "mrqa_triviaqa_open",
-    "mrqa_natural_questions",
-    "mrqa_natural_questions_open",
-    "commonsense_qa",
     "arc_easy",
+    "commonsense_qa",
     "rte",
     "sst",
     "boolq",
-    "copa",
-    "wic",
-    "openbookqa",
-    "anli_r1",
-    "winogrande",
-    "triviaqa",
-    "race",
     "nq_open",
     "piqa",
     "squad2",
-    "squad1",
     "drop",
     "piqa_extractive",
-    "copa_extractive",
     "arc_easy_extractive",
     "commonsense_qa_extractive",
-    "boolq_open",
     "nq_v3",
     "nq_v3_open",
     "nq_v3_mc",
-    "nq_open_no_overlap"
+    "mrqa_hotpotqa",
+    "open_squad1",
+    "triviaqa_ours"
   ],
   "n_shots": [
     0
@@ -42,6 +30,6 @@
     45,
     46
   ],
-  "results_dir": "/home/olab/kirstain/lm-evaluation-harness/results_arzi",
+  "results_dir": "/home/olab/kirstain/lm-evaluation-harness/results",
   "temp_dir": "/home/olab/kirstain/lm-evaluation-harness/tmp/"
 }
