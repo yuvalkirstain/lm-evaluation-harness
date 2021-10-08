@@ -1,7 +1,7 @@
 
 ## A Few More Examples May Be Worth Billions of Parameters
 
-This repo is a fork of the lm-evaluation-harness repo.
+This repo is a fork of the [lm-evaluation-harness repo](https://github.com/EleutherAI/lm-evaluation-harness).
 The main changes are that we enable fine-tuning of models and evaluating T5.
 
 ### Preliminaries 
